@@ -1,0 +1,112 @@
+
+Temat projektu: Visiual Drag & Drop Database Viewer (V3DV)
+
+Sklad zespolu:
+	- Marek Gańko aka Bocian - Web aplication developer & Project manager
+	- Pawel Nejczew aka Wolv - Web aplication developer
+	- Arek Bomba aka kapitan Bomba -Administrator & Database developer, documentation
+
+
+Research:
+	- wybór narzędzi (frameworki)
+	- wybór technologii
+
+Srodowisko pracy:
+
+	- Serwer www - Apache
+	- Serwer baz danych - MySql/PostgreSql
+	- jezyk programowania - PHP5/Java Script
+	- repozytorium - SVN
+	- uzywane narzedzia -
+	    Edytory:
+		- Eclipse/Netbeans
+		- Toad/phpmyadmin/phppgadmin
+		Framework:
+		- jQuery (Java Script)
+		- Smarty (PHP - template engine)
+
+
+SVN:
+host: freq.pl
+login: v3dv
+haslo: v3dv
+
+Cel projektu:
+
+Narzedzie do wizualizacji zapytan SQL oraz mozliwosci graficznego budowania zlozonych zapytan.
+Umożliwia ono przegladanie zawartosci bazy danych Mysql (postgres) osobom nieznającym jezyka SQL.
+
+
+
+Specyfikacja projektu:
+
+	1. User Interface
+
+		- zalacznik (Visio + image)
+
+	2. Specyfikacja techniczna (Struktura)
+
+		- po projektowaniu Modelu MVC - narzedziem do dokumentowania kodu
+
+	3. Specyfikacja uzytkownika
+
+        - po projektowaniu Visio
+
+Zadania:
+	
+	Bomba:
+		- SVN (konta, uprawnienia, zalozenie projektu) - na dzisiaj 05.03.11
+		- Postgres - na 07.03.11
+		- obsluga backupu plikow na repozytorium - na 12.03.05
+		- Uruchomienie i konfiguracja TRAC'a 
+		- dokumentacja użytkownika
+		- dokumentacja techniczna
+		- stworzenie scenariuszy testów
+		- testy aplikacji wedlug scenariuszy 
+			- wykonywanie zroznicowanych zapytan
+	
+	Wolv:
+	
+		- zalatwic Microsoft Visio - na 05.03.11
+		- logo projektu - do 12.03.11
+		- oprawa graficzna i style
+		- Kodowanie
+			1. nawiązanie połączenia z bazą i metody ściągające wymagane informacje z bazy
+			2. prezentacja danych sciagnietych z bazy (tabele, kolumny, polaczenia)
+			3. akcje (drag & drop, generowanie grafu z akcji uzytkownika)
+				- po tym etapie poczatek testow jednostkowych funkcji tworzących graf
+			4. Tworzenie mechanizmu validacji oraz parsowania zapytań z grafu
+				- testy jednostkowe (sprawdzanie poprawnosci wynikowych zapytan)
+			5. Mechanizm tworzenia grafu na podstawie zapytania
+				- testy jednostkowe (sprawdzanie poprawnosci grafu)
+			6. Obsługa konfiguracji
+			7. Obługa wyświetlania danych z zapytania - funkcja sortowania oraz filtracji wyników
+				- po tym etapie poczatek testow wedlug scenariuszy
+	
+	Bocian:
+	
+	    - projekt aplikacji MVC (PHP i JS)
+	    - projekt w Visio UI - do 07.03.11
+	    - Kodowanie 
+	    	1. Pierwszy etap stworzyc interfejs użytkownika (rozlozenie warstw, podstawowe style ukladajace UI)
+	    	2. prezentacja danych sciagnietych z bazy (tabele, kolumny, polaczenia)
+			3. akcje (drag & drop, generowanie grafu z akcji uzytkownika)
+				- po tym etapie poczatek testow jednostkowych funkcji tworzących graf
+			4. Tworzenie mechanizmu validacji oraz parsowania zapytań z grafu
+				- testy jednostkowe (sprawdzanie poprawnosci wynikowych zapytan)
+			5. Mechanizm tworzenia grafu na podstawie zapytania
+				- testy jednostkowe (sprawdzanie poprawnosci grafu)
+			6. Obsługa konfiguracji
+			7. Obługa wyświetlania danych z zapytania - funkcja sortowania oraz filtracji wyników
+				- po tym etapie poczatek testow wedlug scenariuszy
+
+
+Terminy kontrolne - wyniki (zjazdy):
+
+	1. 12-13.03.11
+
+	2. 26-27.03.11
+
+
+
+
