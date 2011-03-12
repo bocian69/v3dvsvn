@@ -4,7 +4,7 @@ Temat projektu: Visiual Drag & Drop Database Viewer (V3DV)
 Sklad zespolu:
 	- Marek Gańko aka Bocian - Web aplication developer & Project manager
 	- Pawel Nejczew aka Wolv - Web aplication developer
-	- Arek Bomba aka kapitan Bomba -Administrator & Database developer, documentation
+	- Arek Bomba aka kapitan Bomba - Administrator & Database developer, documentation
 
 
 Research:
@@ -25,11 +25,6 @@ Srodowisko pracy:
 		- jQuery (Java Script)
 		- Smarty (PHP - template engine)
 
-
-SVN:
-host: freq.pl
-login: v3dv
-haslo: v3dv
 
 Cel projektu:
 
