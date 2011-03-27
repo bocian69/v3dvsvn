@@ -33,7 +33,7 @@
 <div id="wrap_style">
 <div id="wrap" style="width:98%">
 	<div id="main_wrapper_style">
-		<div style="height: 300px; width: 400px;margin: 0px auto;">
+		<div style="height: 400px; width: 400px;margin: 0px auto;">
 			<div id="window_top">
 
 				<div id="wt_left">
