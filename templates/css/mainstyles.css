@@ -304,3 +304,10 @@ p#breadcrumb a:hover {
 	height: 26px;
 	z-index: 19000;
 }
+
+.login_error {
+	text-align:center;
+	font-weight:bold;
+	font-size: 11px;
+	color: red;
+}

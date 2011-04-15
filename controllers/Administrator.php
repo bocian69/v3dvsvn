@@ -58,7 +58,7 @@ Class Controller_Administrator Extends Controller_Base {
 			$this->registry['template']->assign('shipmentCountries', $this->registry->getShipmentCountries());
 			$this->registry['template']->assign('languages',$this->registry->getLanguagesNames());
             $this->registry['template']->config_load('localization.conf', 'pl');
-			if (count($this->route) == 1){ 
+			if (count($this->route) == 1){
 				$this->engageOrders();
 			} else {
 				if( method_exists($this, $this->route[1]) === true) {

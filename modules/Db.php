@@ -2,25 +2,29 @@
 
 Class Db {
 
-	function __construct(&$registry) {
-		$this->registry =& $registry;
+	function __construct() {
 		//$this->registry['db']->debug=1;
 	}
+	var $dbtype = '';
 	
-	function setDbType($type) {
-		$this->dbtype = 'mysql';
+//	function __construct() {}
+	
+	function setDbType($dbtype) {
+		$this->dbtype = $dbtype;
 	}
 	
-	function connect($dbhost, $dbuser, $dbpass, $dbname) {
+	function connect(&$registry, $dbhost, $dbport, $dbuser, $dbpass, $dbname) {
 		try {
-			$db = NewADOConnection($this->dbtype);
-			$db->Connect($dbhost, $dbuser, $dbpass, $dbname);
-			$registry->set ('db', $db);
-			$db->debug = false;
-			$db->SetFetchMode(ADODB_FETCH_ASSOC);
-		} catch (exception $e) {
-		   die('Brak polaczenia z baza danych!');
+			$this->db = NewADOConnection($this->dbtype);
+			$this->db->port = $dbport;
+			$this->db->SetFetchMode(ADODB_FETCH_ASSOC);
+			$this->db->debug = false;
+			$this->db->Connect($dbhost, $dbuser, $dbpass, $dbname);
+			$registry->set('db', $this);
+		} catch (Exception $e) {
+		   return $e->getMessage();
 		}
+		return $this->db;
 	}
 
 	/** FRONT **/

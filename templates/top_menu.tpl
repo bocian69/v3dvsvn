@@ -3,29 +3,13 @@
 		<div id="tm_right">
 			<div class="padding">
 				<ul class="adxm menu">
-					<li><a href="{$main_path}/Administrator/page/,menu" title="Menu i podstrony">Zarządzaj treścią</a></li>
-					<li><a href="#">Moduły</a>
+					<li><a href="#">Menu 1</a>
 						<ul>
-						{section name=modul loop=$admin_modules}
-						<li><a href="{$main_path}/Administrator/page/,modules,{$admin_modules[modul].name}">{$admin_modules[modul].description}</a></li>
-						{/section}
+						<li><a href="{$main_path}/menu2">Menu 2</a></li>
+						<li><a href="{$main_path}/menu3">Menu 3</a></li>
 						</ul>
 					</li>
-					<li><a href="#">Konfiguracja</a>
-						<ul>
-						<li><a href="{$main_path}/Administrator/page/,modules,Users">Użytkownicy</a></li>
-						</ul>
-					</li>
-					{if $MULTILANGUAGE eq true}
-					<li><a href="#" title="Zmień aktywny język">Język</a>
-						<ul>
-							{foreach from=$available_languages key=klucz item=wartosc}
-							<li><a href="{$main_path}/Administrator/page/,setLanguage,{$klucz}"><img src="{$img_path}flags/{$klucz}.gif" /> {$wartosc}{if $klucz eq $lang} (aktywny){/if}</a></li>
-							{/foreach}
-						</ul>
-					</li>
-					{/if}
-					<li><a href="{$main_path}/Administrator/logout">Wyloguj</a></li>
+					<li><a href="{$main_path}/logout">Wyloguj</a></li>
 				</ul>
 			</div>
 		</div>

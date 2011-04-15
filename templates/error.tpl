@@ -33,12 +33,12 @@
 <div id="wrap_style">
 <div id="wrap" style="width:98%">
 	<div id="main_wrapper_style">
-		<div style="height: 450px; width: 400px;margin: 0px auto;">
+		<div style="height: 150px; width: 600px;margin: 0px auto;">
 			<div id="window_top">
 
 				<div id="wt_left">
 					<div id="wt_right">
-						<p id="breadcrumb">V3DV <strong><a href="">Połączenie z bazą</a></strong></p>
+						<p id="breadcrumb"><strong>Błąd</strong> :: <a href="{$main_path}/logout">Panel logowania</a></p>
 						<img src="{$img_path}window_top_right.png" id="tm_r" alt="V3DV" title="V3DV" />
 					</div>
 				</div>
@@ -60,78 +60,11 @@
 							<div id="window_pad">
 								<div class="padding">
 									<div style="height: 300px;">
-										<form action="{$main_path}/index" method="post"><div style="margin:0;padding:0"></div>
-                    {if isset($errors.error_msg)}
-	                    {foreach from=$errors.error_msg item=i}
-							<div class="login_error">{$i}</div>
-						{/foreach}
-                    {/if}
-										<fieldset>
-											<legend>Połączenie z bazą</legend>
-
-
-											<table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-												<tr>
-													<td>
-														<p><label for="input_host">Host: </label><input class="text" id="input_host" name="host" type="text">
-														{if isset($errors.input_host)}
-															<span class="login_error">{$errors.input_host}</span>
-									                    {/if}
-									                    </p>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<p><label for="input_port">Port: </label><input class="text" id="input_port" name="port" type="text">
-														{if isset($errors.input_port)}
-															<span class="login_error">{$errors.input_port}</span>
-									                    {/if}
-									                    </p>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<p><label for="input_login">Login: </label> <input class="text" id="input_login" name="login" type="text">
-														{if isset($errors.input_login)}
-															<span class="login_error">{$errors.input_login}</span>
-									                    {/if}
-									                    </p>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<p><label for="input_passwd">Hasło: </label><input class="text" id="input_passwd" name="haslo" type="password"></p>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<p><label for="input_db">Baza: </label><input class="text" id="input_db" name="db" type="text">
-														{if isset($errors.input_db)}
-															<span class="login_error">{$errors.input_db}</span>
-									                    {/if}
-									                    </p>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<p><label for="select_dbtype">Typ bazy: </label>
-														<select id="select_dbtype" name="dbtype">
-														<option value="mysql">MySql</option>
-														<option value="postgres">Postgres</option>
-														</select>
-														{if isset($errors.select_dbtype)}
-															<span class="login_error">{$errors.select_dbtype}</span>
-									                    {/if}
-									                    </p>
-													</td>
-												</tr>
-											</table>
-											<p style="text-align: center">
-												<button name="submit" value="submit" type="submit"><img src="{$img_path}button_ok.png" alt="Ok" /> Połącz</button>
-											</p>
-										</fieldset>
-										</form>
-
+				                    {if isset($errors.error_msg)}
+					                    {foreach from=$errors.error_msg item=i}
+											<p></p><div class="login_error" style="font-size: 14px;">{$i}</div></p>
+										{/foreach}
+				                    {/if}
 									</div>
 								</div>
 

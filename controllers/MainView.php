@@ -1,6 +1,6 @@
 <?php
 
-Class View_Content {
+Class View_MainView {
 
 	public $args = null;
 	private $moduleName = 'Content';

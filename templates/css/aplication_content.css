@@ -1,0 +1,123 @@
+#mainContent {
+	width: 890px;
+	height: 400px;
+	border: 1px solid green;
+}
+
+#tables {
+	width: 200px;
+	height: 390px;
+	border: 1px solid red;
+	margin: 5px;
+	float: left;
+	position: relative;
+	overflow: auto;
+}
+
+#diagramArea {
+	width: 670px;
+	height: 390px;
+	margin: 5px;
+	margin-left: 0px;
+	border: 1px solid black;
+	float: left;
+}
+
+.tableName {
+	width: 160px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px solid blue;
+	text-align: center;
+}
+
+.dnd {
+	cursor: pointer;	
+}
+
+#additionInfo {
+	width: 890px;
+	height: 200px;
+	margin-top: 5px;
+	border: 1px solid orange;
+}
+
+#tableInfo {
+	width: 200px;
+	height: 190px;
+	margin: 5px;
+	float: left;
+	position: relative;
+	overflow: auto;
+	border: 1px solid red;
+}
+
+#tableInfoHeader {
+	width: 160px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px solid blue;
+	text-align: center;
+}
+
+#tableInfoContent {
+	width: 160px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px solid blue;
+	line-height: 190%;
+}
+
+#sqlArea {
+	width: 670px;
+	height: 190px;
+	margin: 5px;
+	margin-left: 0px;
+	border: 1px solid black;
+	float: left;
+}
+
+#sqlAreaHeader {
+	width: 650px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px solid blue;
+	text-align: center;
+}
+
+#sqlAreaContent {
+	width: 650px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px solid blue;
+}
+
+#sqlQuery {
+	width: 640px;
+	height: 130px;
+}
+
+#dataInfo {
+	width: 890px;
+	height: 200px;
+	margin-top: 5px;
+	border: 1px solid green;
+}
+
+#dataInfoHeader {
+	width: 870px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px solid blue;
+	text-align: center;
+}
+
+#dataInfoContent {
+	width: 870px;
+	height: 150px;
+	margin: 5px auto;
+	padding: 5px;
+	position: relative;
+	overflow: auto;
+	border: 1px solid red;
+}
