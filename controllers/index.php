@@ -82,6 +82,10 @@ Class Controller_Index Extends Controller_Base {
     	$this->index();
     }
     
+    function phpinfo(){
+    	phpinfo();
+    }
+    
     
 	/**
 	 * Uruchomienie modułu struktury strony
