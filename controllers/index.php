@@ -9,6 +9,7 @@ Class Controller_Index Extends Controller_Base {
 		if (!isset($_SESSION['UserData']['host']) && !isset($_SESSION['UserData']['login'])){
 			if (isset($_POST['host']) || isset($_POST['port']) || isset($_POST['login']) || isset($_POST['haslo']) || isset($_POST['db']) || isset($_POST['dbtype'])){
 				$validate = $this->registry->validateConnection($_POST);
+				$this->registry->pokapoka($validate);
 				if (!empty($validate['errors'])) {
 					$this->registry['template']->assign('errors', $validate['errors']);
 					$this->registry['template']->display('login.tpl');
@@ -33,13 +34,13 @@ Class Controller_Index Extends Controller_Base {
 		}
 		if (class_exists($dbtype)) {
 	    	//staramy sie stworzyć obiekt z konektora do bazy danych
-			$connect = $this->beginConnection($dbtype,$host,$port,$login,$pass,$dbname);
+			$connect = $this->beginConnection($dbtype,$host,$port,$login,$haslo,$dbname);
 			if (is_object($connect) === true){
 				$connected = true;
 				$_SESSION['UserData']['host'] = $host;
 				$_SESSION['UserData']['port'] = $port;
 				$_SESSION['UserData']['login'] = $login;
-				$_SESSION['UserData']['haslo'] = $pass;
+				$_SESSION['UserData']['haslo'] = $haslo;
 				$_SESSION['UserData']['dbtype'] = $dbtype;
 				$_SESSION['UserData']['db'] = $dbname;
 				//zalogowalismy sie do bazy
