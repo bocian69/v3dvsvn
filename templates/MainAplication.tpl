@@ -9,8 +9,10 @@
 <link href="{$style_path}columns.css" rel="stylesheet" type="text/css" media="all"/>
 <link href="{$style_path}topmenu.css" rel="stylesheet" type="text/css" media="screen, tv, projection"/>
 <link href="{$style_path}aplication_content.css" rel="stylesheet" type="text/css" media="all"/>
+<link href="{$style_path}ui-darkness/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" media="all"/>
 
 <script type="text/javascript" src="{$js_path}jquery/jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="{$js_path}jquery/jquery-ui-1.8.11.custom.min.js"></script>
 <script type="text/javascript">
 var MainPath = "{$main_path}";
 var ImgPath = "{$img_path}";

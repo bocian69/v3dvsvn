@@ -7,7 +7,30 @@
 	{/foreach}
 	</div>
 	<div id="diagramArea">
-	</div> 
+		<div id="relationsInfo">
+			<div id="relationsInfoHeader">
+			Propozycje połączeń:
+			</div>
+			<div id="relationsInfoContent">
+				<div class="relationsInfoContentElement">
+					<div class="relationsInfoContentElementTable">
+					Table1
+					</div>
+					<div class="relationsInfoContentElementColumn">
+					Column1
+					</div>
+				</div>
+				<div class="relationsInfoContentElement">
+					<div class="relationsInfoContentElementTable">
+					Table2
+					</div>
+					<div class="relationsInfoContentElementColumn">
+					Column2
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div id="additionInfo">
@@ -37,7 +60,7 @@
 {literal}
 <script type="text/javascript">
 $(document).ready(function(){
-	$('.tableName').click(function(){
+	$('.tableName').draggable({ appendTo: "body", helper: "clone", containment: '#mainContent' }).click(function(){
 		$.ajax({
 			type: 'POST',
 			url: MainPath + '/Ajax',
@@ -55,6 +78,18 @@ $(document).ready(function(){
 			}
 		});
 	});
+	/*
+	$("#diagramArea").droppable({
+		activeClass: "ui-state-default",
+		hoverClass: "ui-state-hover",
+		accept: ":not(.ui-sortable-helper)",
+		drop: function( event, ui ) {
+			$( this ).find( ".placeholder" ).remove();
+			$( "<li></li>" ).text( ui.draggable.text() ).appendTo( this );
+		}
+	});
+	*/
+	$('#relationsInfo').draggable({containment: '#diagramArea', handle: '#relationsInfoHeader', cursor: 'move'});
 });
 </script>
 {/literal}
