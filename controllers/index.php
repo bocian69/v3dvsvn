@@ -9,7 +9,6 @@ Class Controller_Index Extends Controller_Base {
 		if (!isset($_SESSION['UserData']['host']) && !isset($_SESSION['UserData']['login'])){
 			if (isset($_POST['host']) || isset($_POST['port']) || isset($_POST['login']) || isset($_POST['haslo']) || isset($_POST['db']) || isset($_POST['dbtype'])){
 				$validate = $this->registry->validateConnection($_POST);
-				$this->registry->pokapoka($validate);
 				if (!empty($validate['errors'])) {
 					$this->registry['template']->assign('errors', $validate['errors']);
 					$this->registry['template']->display('login.tpl');
