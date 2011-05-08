@@ -28,7 +28,6 @@ Class Controller_Content Extends Controller_Base {
 	 */
 
 	function index() {
-		
 		/*
 		$res = $this->registry['db']->Execute('SELECT TABLE_NAME, ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?', array($validate['return']['db']));
 		*/

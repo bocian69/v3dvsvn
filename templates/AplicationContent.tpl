@@ -12,7 +12,7 @@
 			Propozycje połączeń:
 			</div>
 			<div id="relationsInfoContent">
-				<div class="relationsInfoContentElement">
+				<!--<div class="relationsInfoContentElement">
 					<div class="relationsInfoContentElementTable">
 					Table1
 					</div>
@@ -28,6 +28,7 @@
 					Column2
 					</div>
 				</div>
+				-->
 			</div>
 		</div>
 	</div>
@@ -78,6 +79,27 @@ $(document).ready(function(){
 			}
 		});
 	});
+	$.ajax({
+		type: 'POST',
+		url: MainPath + '/Ajax',
+		data: {
+			action: 'showRelations'
+		},
+		success: function(msg){
+			msg = $.parseJSON(msg);
+			html = '';
+			$.each(msg, function(key, val) {
+				var elem = '<div class="relationsInfoContentElement dnd"><div class="relationsInfoContentElementTable">';
+				elem += val.table;
+				elem += '</div><div class="relationsInfoContentElementColumn">';
+				elem += val.column;
+				elem += '</div>';
+				$('#relationsInfoContent').append(elem);
+			});
+			$('.relationsInfoContentElement').draggable({ appendTo: "body", helper: "clone", containment: '#diagramArea', cursor: 'move' })
+		}
+	});
+	
 	/*
 	$("#diagramArea").droppable({
 		activeClass: "ui-state-default",

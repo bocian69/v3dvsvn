@@ -53,5 +53,10 @@ class Controller_Ajax Extends Controller_Base {
 			echo json_encode($info);
 		}
 	}
+	
+	function showRelations(){
+		$info = $this->registry['db']->showRelations();
+		echo json_encode($info);
+	}
 }
 ?>

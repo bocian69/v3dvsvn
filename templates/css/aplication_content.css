@@ -11,7 +11,6 @@
 	margin: 5px;
 	float: left;
 	position: relative;
-	overflow: auto;
 }
 
 #diagramArea {
@@ -128,48 +127,53 @@
 	position: absolute;
 	right: 5px;
 	top: 5px;
-	width: 250px;
-	border: 1px solid red;
-	cursor: move;
+	width: 260px;
+	border: 1px solid black;
 }
 
 #relationsInfoHeader {
 	width: 230px;
 	margin: 5px auto;
 	padding: 5px;
-	border: 1px solid blue;
+	border: 1px solid black;
 	text-align: center;
+	cursor: move;
 }
 
 #relationsInfoContent {
-	width: 240px;
+	width: 260px;
+	height: 200px;
 	margin: 5px auto;
-	border: 1px solid blue;
+	border: 1px solid black;
+	overflow: auto;
 }
 
 .relationsInfoContentElement {
-	width: 100%;
 	height: 20px;
-	border: 1px solid red;
-	line-height: 190%;
+	/*border: 1px solid red;
+	*/line-height: 190%;
+	margin-top: 5px;
 	margin-bottom: 5px;
+	margin-left: 5px;
 }
 
 .relationsInfoContentElementTable {
-	width: 118px;
+	width: 110px;
 	padding: 0;
 	margin: 0;
-	border: 1px solid black;
+	border: 1px solid blue;
 	float: left;
 	position: relative;
+	text-align: center;
 }
 
 .relationsInfoContentElementColumn {
-	width: 118px;
+	width: 110px;
 	padding: 0;
 	margin: 0;
-	border: 1px solid black;
+	border: 1px solid blue;
 	float: left;
 	position: relative;
+	text-align: center;
 }
 
