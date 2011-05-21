@@ -6,7 +6,6 @@ Class Controller_Graph Extends Controller_Base
 	 *
 	 * Starter
 	 */
-
 	public function index()
     {
         if (isset($_POST['action']))
@@ -20,19 +19,6 @@ Class Controller_Graph Extends Controller_Base
 		echo 'Błąd! Żądana metoda nie istnieje.';
 		die;
 	}
-
-	/**
-	 *
-	 * Zmienna przechowująca argumenty z GET
-	 * @var array
-	 */
-
-    public function phpinfo()
-    {
-        phpinfo();
-    }
-
-	var $args = array();
 
 	/**
 	 *
@@ -64,7 +50,6 @@ Class Controller_Graph Extends Controller_Base
     private $aliases = array();
     public $circlesStructure = array();
     public $circlesStructures = array();
-    public $joinStructure = array();
     public $levelsPortions = array();
     private $mainTable = '';
 
@@ -84,6 +69,11 @@ Class Controller_Graph Extends Controller_Base
         print_r($return);
     }
 
+    /**
+     * Pseudo __construct
+     * 
+     * @return <bool>
+     */
     private function noConstructorNoFun()
     {
         if (isset($_POST['query']))
@@ -99,7 +89,14 @@ Class Controller_Graph Extends Controller_Base
         }
     }
 
-    public function sqlToArray()
+    /**
+     * Obrobka zapytania
+     * dispatch czesci zapytania do zmiennych
+     * parsowanie czesci
+     * 
+     * ! tymczasowo bez where !
+     */
+    private function sqlToArray()
     {
         //dispatch query
         $this->dispatchQuery();
@@ -107,10 +104,13 @@ Class Controller_Graph Extends Controller_Base
         $this->parseFrom();
         $this->parseSelect();
 //            $this->parseWhere($matchesarray);
-        $this->parseJoinStructure();
-        $this->parseCirclesStructure();
+
+//        $this->parseCirclesStructure();
     }
 
+    /**
+     * Dispatcher zapytania na sekcje select, from, where
+     */
     private function dispatchQuery()
     {
         foreach ($this->regexps as $kreg => $vreg)
@@ -135,10 +135,13 @@ Class Controller_Graph Extends Controller_Base
         }
     }
 
+    /**
+     * Parsowanie sekcji from (joiny)
+     * 'and' traktowane sa jak 'on'
+     */
     private function parseFrom()
     {
         $string = $this->dispatchedFrom;
-        $matchesarray = array();
         preg_match_all('/(\w+(\.|\s){0,1}\w+|\=)/ims', strtolower($string), $matches);
         $onWriteFlag = false;
         $andWriteFlag = false;
@@ -254,6 +257,9 @@ Class Controller_Graph Extends Controller_Base
         $this->parsedQuery = $this->sectionFrom;
     }
 
+    /**
+     * Parsowanie sekcji select
+     */
     private function parseSelect()
     {
         $string = $this->dispatchedSelect;
@@ -284,6 +290,9 @@ Class Controller_Graph Extends Controller_Base
         $this->parsedQuery['select'] = $this->sectionSelect['select'];
     }
 
+    /**
+     * @todo: Parsowanie sekcji where
+     */
     private function parseWhere()
     {
         $parsed_array = array();
@@ -291,135 +300,14 @@ Class Controller_Graph Extends Controller_Base
         $this->parsedQuery['where'] = $parsed_array;
     }
 
-    private function parseCirclesStructure()
-    {
-        $this->circlesStructure[$this->mainTable] = array();
-        $this->circlesStructure = $this->parseCirclesStructureForeach($this->circlesStructure);
-    }
-
-
-    private function parseCirclesStructureForeach($array)
-    {
-        foreach ($array as $k => &$eV)
-        {
-            if ($k == $this->mainTable)
-            {
-                if (isset($this->joinStructure[$this->mainTable]))
-                {
-                    foreach ($this->joinStructure[$this->mainTable] as $v)
-                    {
-                        $eV[$v['to']] = array();
-                        $eV = $this->parseCirclesStructureForeach($eV);
-                    }
-                }
-            }
-            else if (isset($this->joinStructure[$k]))
-            {
-                foreach ($this->joinStructure[$k] as $v)
-                {
-                    $eV[$v['to']] = array();
-                    $eV = $this->parseCirclesStructureForeach($eV);
-                }
-            }
-        }
-        return $array;
-    }
-
-
-    private function parseCirclesStructures()
-    {
-        $this->circlesStructure[] = array();
-        $this->circlesStructure = $this->parseCirclesStructuresRecursive($this->circlesStructure, 0, $this->mainTable);
-    }
-
-
-    private function parseCirclesStructuresRecursive($array, $level = 0, $name)
-    {
-        $counter = 0;
-        foreach ($array as $k => &$eV)
-        {
-            if ($k == $this->mainTable)
-            {
-                if (isset($this->joinStructure[$this->mainTable]))
-                {
-                    $eV['data']['level'] = $level;
-                    $eV['data']['position'] = $counter++;
-                    $eV['data']['name'] = $name;
-                    foreach ($this->joinStructure[$this->mainTable] as $kk => $vv)
-                    {
-                        $next = array();
-                        $next = $this->parseCirclesStructuresRecursive($next, $level+1, $vv['to']);
-                        $eV['joined'] = $next;
-                    }
-                }
-            }
-            else if (isset($this->joinStructure[$k]))
-            {
-                $eV['data']['level'] = $level;
-                $eV['data']['position'] = $counter++;
-                foreach ($this->joinStructure[$k] as $kk => $vv)
-                {
-                    $next[$vv['to']] = array();
-                    $next = $this->parseCirclesStructuresRecursive($next, $level+1);
-                    $eV['joined'] = $next;
-                }
-            }
-
-        }
-        return $array;
-    }
-
-    private function parseJoinStructure()
-    {
-        $qArray = $this->parsedQuery;
-
-        if (isset($qArray['from']))
-        {
-            $qArray['main'] = $qArray['from'];
-        }
-
-        if (isset($qArray['join']))
-        {
-            foreach ($qArray['join'] as $key => $joinArray)
-            {
-                foreach ($joinArray['on'] as $k => $v)
-                {
-                    if ($v[0]['from'] == $joinArray['to']['name'])
-                    {
-                        $tArray[$v[1]['from']][] = array(
-                            'to' => $v[0]['from'],
-                            'columns' => array(
-                                'from' => $v[1]['column'],
-                                'to' => $v[0]['column']
-                                ),
-                             'junction' => $v['junction']
-                            );
-                    }
-                    else if ($v[1]['from'] == $joinArray['to']['name'])
-                    {
-                        $tArray[$v[0]['from']][] = array(
-                            'to' => $v[1]['from'],
-                            'columns' => array(
-                                'from' => $v[0]['column'],
-                                'to' => $v[1]['column']
-                                ),
-                             'junction' => $v['junction']
-                            );
-                    }
-                }
-            }
-        }
-        
-        if ( !empty($tArray))
-        {
-            $this->joinStructure = $tArray;
-        }
-    }
-
     public $coords = array();
     public $coordsCounted = array();
     public $metrics = array();
 
+    /**
+     * Obliczanie struktury i koordynatow w ukladzie kartezjanskim
+     * metoda inicjujaca countLevels oraz countMetrics
+     */
     public function countCords ()
     {
         $this->coords[$this->parsedQuery['from']['name']]['level'] = 0;
@@ -427,9 +315,6 @@ Class Controller_Graph Extends Controller_Base
         
         $this->coordsCounted = $this->coords;
         $this->countMetrics($this->coords, $this->coordsCounted);
-//        print_r($this->coordsCounted);
-//        die;
-//        return $coords;
     }
 
     private function countMetrics($coords, &$countedArray, $parentsParts = 1, $angle_start = 0, $angle_end = 360)
@@ -441,10 +326,7 @@ Class Controller_Graph Extends Controller_Base
         {
             if ($vk['level'] != 0)
             {
-
-//                $vk['coords'] = $this->cartesian($angle_of_single_part, $angle_of_single_part*$part, $angle_of_single_part*($part+1), $parentsParts, $vk['level']);
-              
-                $countedArray[$k]['coords'] = $this->cartesian($angle_of_single_part, $angle_start + $angle_of_single_part*$part, $angle_start + $angle_of_single_part*($part+1), $parentsParts, $vk['level']);
+                $countedArray[$k]['coords'] = $this->cartesian($angle_of_single_part, $angle_start + $angle_of_single_part*$part, $angle_start + $angle_of_single_part*($part+1), $vk['level']);
             }
 
             if ( isset($vk['children']) and is_array($vk['children']))
@@ -453,18 +335,16 @@ Class Controller_Graph Extends Controller_Base
             }
             $part++;
         }
-
-//        if ( empty($metrics))
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            return $metrics;
-//        }
     }
 
-    private function countLevels ($parent, $level = 0)
+    /**
+     * Tworzenie hierarhii joinow - zapis do tablicy
+     *
+     * @param <string> $parent
+     * @param <int> $level
+     * @return <array_or_false>
+     */
+    private function countLevels($parent, $level = 0)
     {
         foreach($this->parsedQuery['join'] as $table => $join_array)
         {
@@ -513,17 +393,27 @@ Class Controller_Graph Extends Controller_Base
         }
     }
 
-    // initials vars for drawer
-    public $stMx = 300;
-    public $stMy = 200;
-    // zmienne
-    public $rGap = 5; //circles space
-    public $rCircleS = 5; // small circle
-    public $rCircleL = 20; //bigger circle
+    // zmienne potrzebne do obliczania elementow
+    public $stMx = 300; //calosciowe, poziome przesuniecie ukladu (srodka)
+    public $stMy = 200; //calosciowe, pionowe przesuniesie ukladu (srodka)
+    public $rGap = 5; //przestrzen miedzy okregami
+    public $rCircleS = 5; // maly luk
+    public $rCircleL = 20; // duzy luk
     public $radConv = 0.017453292519943295;
 
-    private function cartesian($angle_single, $angle_start = 0, $angle_end = 360, $parentsParts, $level)
+    /**
+     *Obliczanie elementu w układzie kartezjanskim
+     *
+     * @param <numeric> $angle_single
+     * @param <numeric> $angle_start
+     * @param <numeric> $angle_end
+     * @param <int> $level
+     * @return <array>
+     */
+    private function cartesian($angle_single, $angle_start = 0, $angle_end = 360, $level)
     {
+        $cords = array();
+        
         $cords['rS'] = ($this->rGap * ($level)) + ($this->rCircleS * ($level-1)) + ($this->rCircleL * ($level));
         $cords['rM'] = ($this->rGap * ($level)) + ($this->rCircleS * ($level)) + ($this->rCircleL * ($level));
         $cords['rL'] = ($this->rGap * ($level)) + ($this->rCircleS * ($level)) + ($this->rCircleL * ($level+1));
@@ -549,29 +439,5 @@ Class Controller_Graph Extends Controller_Base
 
         return $cords;
     }
-
-    public function wolvtest ()
-    {
-        var_dump('aaaa');
-    }
 }
-/*
-$V3ParserInstance = new V3Parser();
-
-$V3ParserInstance->countCords();
-$return_clean = $V3ParserInstance->coords;
-
-//$return_clean = array(
-//        'parsedQuery' => $V3ParserInstance->parsedQuery,
-//        'joinStructure' => $V3ParserInstance->joinStructure,
-//        'circlesStructure' => $V3ParserInstance->circlesStructure
-//        );
-
-//print_r('<pre>');print_r($return_clean);print_r('</pre>');
-//die;
- *
-$return_clean = $V3ParserInstance->coords;
-$return = json_encode($return_clean);
-print_r($return);
-*/
 ?>
