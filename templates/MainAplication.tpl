@@ -11,8 +11,14 @@
 <link href="{$style_path}aplication_content.css" rel="stylesheet" type="text/css" media="all"/>
 <link href="{$style_path}ui-darkness/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" media="all"/>
 
-<script type="text/javascript" src="{$js_path}jquery/jquery-1.5.2.min.js"></script>
+
+<!--<script type="text/javascript" src="{$js_path}jquery/jquery-1.5.2.min.js"></script>-->
+<script type="text/javascript" src="{$js_path}jquery-1.4.2svg.min.js"></script><!-- svg modified -->
+<!--<script type="text/javascript" src="js/jquery_ui/js/jquery-ui-1.8.11.custom.min.js"></script>-->
 <script type="text/javascript" src="{$js_path}jquery/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{$js_path}jquery.svg.js"></script>
+
+
 <script type="text/javascript">
 var MainPath = "{$main_path}";
 var ImgPath = "{$img_path}";

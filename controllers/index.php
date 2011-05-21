@@ -96,19 +96,31 @@ Class Controller_Index Extends Controller_Base {
     	$Content->setArgs($args);
     	$Content->index();
     }
-    
-    
+
+
     /**
-     * 
+     *
      * Kontroler odpowiadający za zapytania ajaxowe
      * @param $args
      */
-    
+
     function Ajax($args = array()) {
-    	$this->index(true);
+    	$this->index();
     	$Ajax = new Controller_Ajax($this->registry);
     	$Ajax->setArgs($args);
     	$Ajax->index();
+    }
+
+    /**
+     *
+     * Kontroler odpowiadający za zapytania ajaxowe
+     * @param $args
+     */
+
+    function Graph($args = array()) {
+    	$Graph = new Controller_Graph($this->registry);
+    	$Graph->setArgs($args);
+    	$Graph->index();
     }
     
   

@@ -38,7 +38,8 @@ class Controller_Ajax Extends Controller_Base {
 			die;
 		}
 		if (isset($_POST['action'])) {
-			if( method_exists('Controller_Ajax', $_POST['action']) === true) {
+			if( method_exists('Controller_Ajax', $_POST['action']) === true)
+            {
 				call_user_func(array(&$this, $_POST['action']));
 				die;
 		    }
