@@ -53,10 +53,14 @@ Class Controller_Graph Extends Controller_Base
     public $levelsPortions = array();
     private $mainTable = '';
 
+    /**
+     * Pobieranie koordynatow w ukladzie kartezjanskim potrzebnych do narysowania lukow
+     */
     public function getCoords()
     {
         if (false !== $this->noConstructorNoFun())
         {
+            $this->sqlToArray();
             $this->countCords();
             $return_clean = $this->coordsCounted;
             $return = json_encode($return_clean);
@@ -70,6 +74,151 @@ Class Controller_Graph Extends Controller_Base
     }
 
     /**
+     *  Pobranie zdispachowanego zapytania
+     */
+    public function getJoins()
+    {
+        if (false !== $this->noConstructorNoFun())
+        {
+            $this->sqlToArray();
+            foreach($this->parsedQuery['join'] as $v)
+            {
+                foreach($v['on'] as $k2 => $v2)
+                {
+                    foreach($v2 as $k3 => $v3)
+                    {
+                        if (is_int($k3) and $v['to'] != $v3['from'])
+                        {
+                            $from = $v3['from'];
+                        }
+                    }
+                    $return_clean[] = array(
+                        'from' => $from,
+                        'to' => $v['to'],
+                        'on' => array($v2),
+                        'type' => $v['type']
+                    );
+                }
+            }
+            $return = json_encode($return_clean);
+        }
+        else
+        {
+            $return = "Error Notifier";
+        }
+
+        print_r($return);
+    }
+
+    /**
+     * Zwraca zapytanie zlozone z tablic
+     */
+    public function getQuery()
+    {
+        if (false !== $this->noConstructorNoFun())
+        {
+            $this->sqlToArray();
+
+            if ( !empty($_POST['joins']))
+            {
+                $this->parsedQuery['join'] = $_POST['joins'];
+            }
+
+            $this->patchQueryArray();
+            
+            print_r($this->reparsedSelect);
+            print_r($this->reparsedFrom);
+            print_r($this->reparsedJoin);
+            print_r($this->reparsedWhere);
+        }
+        else
+        {
+            $return = "Error Notifier";
+        }
+
+        print_r($return);
+    }
+
+    /**
+     * Wywolanie metod ktore konwertuja tablice na string do zlozenia query
+     */
+    private function patchQueryArray()
+    {
+        if ( !empty($this->parsedQuery['select']))
+        {
+            $this->reparseSelect();
+        }
+        if ( !empty($this->parsedQuery['from']))
+        {
+            $this->reparseFrom();
+        }
+        if ( !empty($this->parsedQuery['join']))
+        {
+            $this->reparseJoin();
+        }
+        if ( !empty($this->parsedQuery['where']))
+        {
+            $this->reparseWhere();
+        }
+    }
+
+    public $reparsedSelect;
+    public $reparsedFrom;
+    public $reparsedJoin;
+    public $reparsedWhere;
+
+    /**
+     * Tworzenie select z tablicy
+     */
+    private function reparseSelect()
+    {
+        $this->reparsedSelect = "SELECT \n\t";
+        foreach($this->parsedQuery['select'] as $v)
+        {
+            $this->reparsedSelect .= " " . $v['alias'] . "." . $v['name'] . ",";
+        }
+        $this->reparsedSelect = substr($this->reparsedSelect, 0, strlen($this->reparsedSelect)-1);
+    }
+
+    /**
+     * Tworzenie from z tablicy
+     */
+    private function reparseFrom()
+    {
+        $this->reparsedFrom = "\nFROM \n\t";
+        $this->reparsedFrom .= " " . $this->parsedQuery['from']['name'] . " " . $this->parsedQuery['from']['alias'];
+    }
+
+    /**
+     * Tworzenie join z tablicy
+     */
+    private function reparseJoin()
+    {
+        $this->reparsedJoin = "";
+        foreach($this->parsedQuery['join'] as $k => $v)
+        {
+            $this->reparsedJoin .= "\n" . strtoupper($v['type']) . " JOIN ";
+            $this->reparsedJoin .= "\n\t" . $v['to']['name'] . " " . $v['to']['alias'] . "\n";
+            $this->reparsedJoin .= "ON";
+            foreach ($v['on'] as $vv)
+            {
+                $this->reparsedJoin .= "\n\t" . $vv[0]['alias'] . "." . $vv[0]['column'] . " " . $vv['junction'] . " " . $vv[1]['alias'] . "." . $vv[1]['alias'] . "\n";
+                $this->reparsedJoin .= "AND";
+            }
+
+            $this->reparsedJoin = substr($this->reparsedJoin, 0, strlen($this->reparsedJoin)-3);
+        }
+    }
+
+    /**
+     * Tworzenie where z tablicy
+     */
+    private function reparseWhere()
+    {
+        $this->reparsedWhere = $this->dispatchedWhere;
+    }
+
+    /**
      * Pseudo __construct
      * 
      * @return <bool>
@@ -79,8 +228,6 @@ Class Controller_Graph Extends Controller_Base
         if (isset($_POST['query']))
         {
             $this->sql_query = $_POST['query'];
-            $this->sqlToArray();
-            
             return true;
         }
         else
@@ -103,9 +250,7 @@ Class Controller_Graph Extends Controller_Base
         //musimy zparsowac wszystkie tabele do ktorych zapytujemy
         $this->parseFrom();
         $this->parseSelect();
-//            $this->parseWhere($matchesarray);
-
-//        $this->parseCirclesStructure();
+        $this->parseWhere();
     }
 
     /**
@@ -233,7 +378,8 @@ Class Controller_Graph Extends Controller_Base
                     $temp = explode('.', $v);
                     $this->sectionFrom['join'][$joinOpenToWrite]['on'][$onCount][] = array(
                         'column' => isset($temp[1]) ? $temp[1] : '',
-                        'from' => (isset($temp[0]) and isset($this->aliases[$temp[0]])) ? $this->aliases[$temp[0]] : ''
+                        'from' => (isset($temp[0]) and isset($this->aliases[$temp[0]])) ? $this->aliases[$temp[0]] : '',
+                        'alias' => isset($temp[0]) ? $temp[0] : ''
                     );
 
                     unset($temp);
@@ -271,7 +417,7 @@ Class Controller_Graph Extends Controller_Base
         {
             if (in_array($v, array('select')))
             {
-                $this->sectionSelect['select']['select'] = array();
+                $this->sectionSelect['select'] = array();
             }
             else if ( isset($this->sectionSelect['select']) and in_array($v, array('*')))
             {
@@ -295,9 +441,8 @@ Class Controller_Graph Extends Controller_Base
      */
     private function parseWhere()
     {
-        $parsed_array = array();
         //some parsing code goes here
-        $this->parsedQuery['where'] = $parsed_array;
+        $this->parsedQuery['where'] = $this->dispatchedWhere;
     }
 
     public $coords = array();
@@ -396,9 +541,9 @@ Class Controller_Graph Extends Controller_Base
     // zmienne potrzebne do obliczania elementow
     public $stMx = 300; //calosciowe, poziome przesuniecie ukladu (srodka)
     public $stMy = 200; //calosciowe, pionowe przesuniesie ukladu (srodka)
-    public $rGap = 5; //przestrzen miedzy okregami
-    public $rCircleS = 5; // maly luk
-    public $rCircleL = 20; // duzy luk
+    public $rGap = 6; //przestrzen miedzy okregami
+    public $rCircleS = 10; // maly luk
+    public $rCircleL = 30; // duzy luk
     public $radConv = 0.017453292519943295;
 
     /**

@@ -186,15 +186,15 @@ stMx : 300,
 stMy : 200,
 svg : '',
 // zmienne
-rGap : 5, //circles space
-rCircleS : 5, // small circle
-rCircleL : 20, //bigger circle
+rGap : 10, //circles space
+rCircleS : 10, // small circle
+rCircleL : 30, //bigger circle
 //alpha : 360 / this.portions,
 radConv : 0.017453292519943295,
 cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
-
+joins : new Object(),
 init : function()
 {
     $('#diagramArea').svg();
@@ -203,7 +203,8 @@ init : function()
 
     /* kolko centrum - red */
     this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'red', strokeWidth: 1, id: 'mainCircle'});
-    this.getParsedQuery();
+    this.getCoords();
+    this.getJoins()
 
     for (var first in this.cords)
     {
@@ -212,28 +213,13 @@ init : function()
     this.binds();
 },
 
-getParsedQuery : function()
-{
-    var postData = {action : 'getCoords', query : $('#sqlQuery').val()};
-
-    $.ajax({
-        type: "POST",
-        url: MainPath + '/Graph',
-        async: false,
-        data: postData,
-        success: function(msg)
-        {
-            var parsedQuery = jQuery.parseJSON(msg);
-
-            V3Graph.cords = parsedQuery;
-        }
-    });
-},
-
 drawFromCords : function()
 {
     this.draw();
 },
+
+tableIdPrefix : 'JS__V3DV__table__',
+joinIdPrefix : 'JS__V3DV__join__',
 
 draw : function(cords)
 {
@@ -251,7 +237,7 @@ draw : function(cords)
                 .arc(cords.coords.rM, cords.coords.rM, 0,0,0, cords.coords.start.xM, cords.coords.start.yM)
                 .line(cords.coords.start.xS, cords.coords.start.yS)
                 .close(),
-            {strokeWidth: 1, stroke: "blue", fill: '#aaa', class: 'testowaCSS', id: cords.from + '_join_area'}
+            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from}
             );
         var path = svg.createPath();
         svg.path(
@@ -262,7 +248,7 @@ draw : function(cords)
                 .arc(cords.coords.rL, cords.coords.rL, 0,0,0, cords.coords.start.xL, cords.coords.start.yL)
                 .line(cords.coords.start.xM, cords.coords.start.yM)
                 .close(),
-            {strokeWidth: 1, stroke: "blue", fill: '#aaa', class: 'testowaCSS', id: cords.from + '_table_area'}
+            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from}
             );
     }
     for (var kk in cords.children)
@@ -288,38 +274,59 @@ binds : function()
             V3Graph.draggedNow = false;
         },
         cursor: 'move'
-    }).click(function()
+    }).mousedown(function()
     {
-
+		$.ajax({
+			type: 'POST',
+			url: MainPath + '/Ajax',
+			data: {
+				action: 'getTableInfo',
+				table: $(this).attr('id')
+			},
+			success: function(msg){
+				msg = $.parseJSON(msg);
+				html = '';
+				$.each(msg, function(key, val) {
+					html += key + ': ' + val + '<br\/>';
+				});
+				$('#tableInfoContent').html(html);
+			}
+		});
 	});
         /* bindy */
 
-     $('.testowaCSS', this.svg.root())
+     $('.JSgraphElement', this.svg.root())
         .bind('mouseup', this.svgMouseup)
         .bind('mouseover', this.svgOver)
         .bind('mouseout', this.svgOut);
 
-    $('.testowaCSS', this.svg.root());
+    $('.JSgraphElement', this.svg.root());
 },
 
 svgMouseup : function()
 {
-    if (false !== V3Graph.draggedNow)
+    if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp') && false !== V3Graph.draggedNow)
     {
-        alert('Just dropped "' + $(V3Graph.draggedNow).attr('id') + '" on: "' + $(this).attr('id') + '"');
-        V3Graph.getParsedQuery();
+//        alert('Just dropped "' + $(V3Graph.draggedNow).attr('id') + '" on: "' + $(this).attr('id') + '"');
+        V3Graph.extendJoin($(V3Graph.draggedNow).attr('id'), $(this).attr('id'));
+        V3Graph.getCoords();
     }
     else
-        alert('I\'m "' + $(this).attr('id') + '"! You have clicked me.');
+    {
+        if (false === V3Graph.draggedNow)
+        {
+            alert('I\'m "' + $(this).attr('id') + '"! You have clicked me.');
+        }
+    }
 },
 
 svgOver : function()
 {
-    if (false !== V3Graph.draggedNow)
+    if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp') && false !== V3Graph.draggedNow)
     {
-        $(this).attr({'opacity': '0.7',fill: '#afa'});
+        $(this).attr({'opacity': '0.7',fill: '#000'});
     }
-    else
+    else if (false === V3Graph.draggedNow)
     {
         $(this).attr('opacity', '0.7');
     }
@@ -328,6 +335,82 @@ svgOver : function()
 svgOut : function()
 {
     $(this).attr({'opacity': '1',fill: '#aaa'});
+},
+
+extendJoin : function(draggableId, droppableId)
+{
+    if ('undefined' == typeof this.joins)
+    {
+        this.getJoins();
+    }
+
+    this.joins.added =
+    {
+        from : draggableId.split(V3Graph.joinIdPrefix).join(''),
+        on :
+        {
+            0 : {alias : '', column : '', from : draggableId.split(V3Graph.joinIdPrefix).join('')},
+            1 : {alias : '', column : '', from : droppableId.split(V3Graph.tableIdPrefix).join('')}
+        },
+        to : { name : droppableId.split(V3Graph.tableIdPrefix).join('') },
+        type : 'inner'
+    };
+},
+
+getCoords : function()
+{
+    var postData = {action : 'getCoords', query : $('#sqlQuery').val()};
+
+    $.ajax({
+        type: "POST",
+        url: MainPath + '/Graph',
+        async: false,
+        data: postData,
+        success: function(msg)
+        {
+            var parsedQuery = jQuery.parseJSON(msg);
+
+            V3Graph.cords = parsedQuery;
+        }
+    });
+},
+
+getJoins : function()
+{
+    var postData = {action : 'getJoins', query : $('#sqlQuery').val()};
+
+    $.ajax({
+        type: "POST",
+        url: MainPath + '/Graph',
+        async: false,
+        data: postData,
+        success: function(msg)
+        {
+            var joins = jQuery.parseJSON(msg);
+
+            V3Graph.joins = joins;
+        }
+    });
+},
+
+getQuery : function()
+{
+    var postData = {action : 'getQuery', query : $('#sqlQuery').val(), joins : this.joins};
+
+    $.ajax({
+        type: "POST",
+        url: MainPath + '/Graph',
+        async: false,
+        data: postData,
+        success: function(msg)
+        {
+            var query = msg;
+
+//            V3Graph.query = query;
+
+            $('#sqlQuery').val(query);
+        }
+    });
 }
 }
 

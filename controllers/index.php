@@ -105,7 +105,7 @@ Class Controller_Index Extends Controller_Base {
      */
 
     function Ajax($args = array()) {
-    	$this->index();
+    	$this->index(true);
     	$Ajax = new Controller_Ajax($this->registry);
     	$Ajax->setArgs($args);
     	$Ajax->index();
