@@ -125,11 +125,8 @@ Class Controller_Graph Extends Controller_Base
             }
 
             $this->patchQueryArray();
-            
-            print_r($this->reparsedSelect);
-            print_r($this->reparsedFrom);
-            print_r($this->reparsedJoin);
-            print_r($this->reparsedWhere);
+           
+            $return = $this->reparsedSelect . $this->reparsedFrom . $this->reparsedJoin . $this->reparsedWhere;
         }
         else
         {
@@ -202,7 +199,7 @@ Class Controller_Graph Extends Controller_Base
             $this->reparsedJoin .= "ON";
             foreach ($v['on'] as $vv)
             {
-                $this->reparsedJoin .= "\n\t" . $vv[0]['alias'] . "." . $vv[0]['column'] . " " . $vv['junction'] . " " . $vv[1]['alias'] . "." . $vv[1]['alias'] . "\n";
+                $this->reparsedJoin .= "\n\t" . $vv[0]['alias'] . "." . $vv[0]['column'] . " " . $vv['junction'] . " " . $vv[1]['alias'] . "." . $vv[1]['column'] . "\n";
                 $this->reparsedJoin .= "AND";
             }
 
@@ -460,6 +457,79 @@ Class Controller_Graph Extends Controller_Base
         
         $this->coordsCounted = $this->coords;
         $this->countMetrics($this->coords, $this->coordsCounted);
+        
+    }
+
+    /**
+     * Tworzenie hierarhii joinow - zapis do tablicy
+     *
+     * @param <string> $parent
+     * @param <int> $level
+     * @return <array_or_false>
+     */
+    private function countLevels($parent, $level = 0)
+    {
+        //wszystkie joiny w zapytaniu
+        foreach($this->parsedQuery['join'] as $table => $join_array)
+        {
+            //warunki dla joina (on + and)
+            foreach ($join_array['on'] as $varr)
+            {
+                // kolumny z warunku
+                foreach($varr as $k => $v)
+                {
+                    // jezeli ktorys z joinow odpowiada parentowi
+                    if( is_int($k) and $parent == $v['from'])
+                    {
+                        if ( !isset($cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]))
+                        {
+                            $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])] = array(
+                                'column' => 1 == $k ? $varr[0]['column'] : $varr[1]['column'],
+                                'from' => 1 == $k ? $varr[0]['from'] : $varr[1]['from'],
+                                'level' => $level+1,
+                            );
+                        }
+                        // jezeli istnieje juz taki element to dodajemy do tablicy joina
+                        $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]['join'][] = array(
+                                'join_name' => 1 == $k ? $varr[1]['from'] : $varr[0]['from'],
+                                'join_column' => 1 == $k ? $varr[1]['column'] : $varr[0]['column']
+                            );
+                        
+                        $nextOnesToBeParent[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])][] = $table;
+                    }
+                }
+            }
+        }
+        
+        if ( isset($nextOnesToBeParent) and is_array($nextOnesToBeParent))
+        {
+            $nextNames = array();
+            foreach ($nextOnesToBeParent as $nextName => $elementsToDelArray)
+            {
+                foreach($elementsToDelArray as $elementsToDel)
+                {
+                    unset($this->parsedQuery['join'][$elementsToDel]);
+                }
+                $nextNames[] = $nextName;
+            }
+            
+            foreach ($nextNames as $nextOneToBeParent)
+            {
+                if (false !== ($childern = $this->countLevels($nextOneToBeParent, $level+1)))
+                {
+                    $cords[$nextOneToBeParent]['children'] = $childern;
+                }
+            }
+        }
+
+        if ( !empty($cords))
+        {
+            return $cords;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private function countMetrics($coords, &$countedArray, $parentsParts = 1, $angle_start = 0, $angle_end = 360)
@@ -481,63 +551,7 @@ Class Controller_Graph Extends Controller_Base
             $part++;
         }
     }
-
-    /**
-     * Tworzenie hierarhii joinow - zapis do tablicy
-     *
-     * @param <string> $parent
-     * @param <int> $level
-     * @return <array_or_false>
-     */
-    private function countLevels($parent, $level = 0)
-    {
-        foreach($this->parsedQuery['join'] as $table => $join_array)
-        {
-            foreach ($join_array['on'] as $karr => $varr)
-            {
-                foreach($varr as $k => $v)
-                {
-                    if( is_int($k) and $parent == $v['from'])
-                    {
-                        if ( !isset($cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]))
-                        {
-                            $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])] = array(
-                                'column' => 1 == $k ? $varr[0]['column'] : $varr[1]['column'],
-                                'from' => 1 == $k ? $varr[0]['from'] : $varr[1]['from'],
-                                'level' => $level+1,
-                            );
-                            $nextOneToBeParent = 1 == $k ? $varr[0]['from'] : $varr[1]['from'];
-                        }
-                        $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]['join'][] = array(
-                                'join_name' => 1 == $k ? $varr[1]['from'] : $varr[0]['from'],
-                                'join_column' => 1 == $k ? $varr[1]['column'] : $varr[0]['column']
-                            );
-                    }
-                }
-            }
-
-            if ( !empty($nextOneToBeParent))
-            {
-                unset($this->parsedQuery['join'][$table]);
-
-                if (false !== ($childern = $this->countLevels($nextOneToBeParent, $level+1)))
-                {
-                    $cords[$nextOneToBeParent]['children'] = $childern;
-                }
-                unset($nextOneToBeParent);
-            }
-        }
-
-        if ( !empty($cords))
-        {
-            return $cords;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
+    
     // zmienne potrzebne do obliczania elementow
     public $stMx = 300; //calosciowe, poziome przesuniecie ukladu (srodka)
     public $stMy = 200; //calosciowe, pionowe przesuniesie ukladu (srodka)

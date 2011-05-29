@@ -37,70 +37,132 @@
         -->
 </div>
 
-<div id="additionInfo">
+<div id="additionInfo" style="height:920px">
 	<div id="tableInfo">
 		<div id="tableInfoHeader">Informacje o tabeli:</div>
 		<div id="tableInfoContent"></div>
 	</div>
-	<div id="sqlArea">
+	<div id="sqlArea" style="height:900px">
 		<div id="sqlAreaHeader">
 		Zapytanie SQL:
 		</div>
-		<div id="sqlAreaContent">
-		<textarea id="sqlQuery">SELECT
-                                    t.tield1, t.tield2, t.tield3, t.tield4,
-                                    p.pield,
-                                    f.field4
-                                FROM
-                                    table t
+		<div id="sqlAreaContent" style="height:820px">
+<!--            <textarea id="sqlQuery" style="height:800px">
+SELECT
+*
+FROM
+    table t
 
-                                left JOIN
-                                    fable f
-                                ON
-                                    f.field = t.tield1
-                                AND
-                                    f.field2 = t.tield3
-                                right JOIN
-                                    pable p
-                                ON
-                                    p.pield = t.tield1
-                                AND
-                                    p.pield2 = t.tield3
+left JOIN
+    aaa a
+ON
+    a.aield = t.tield1
+AND
+    a.field2 = t.tield3
 
-                                JOIN
-                                    iable i
-                                ON
-                                    i.iield = p.pield1
-                                AND
-                                    i.iield2 = p.pield3
+right JOIN
+    pable b
+ON
+    b.bield = t.tield1
+AND
+    b.bield2 = t.tield3
 
-                                JOIN
-                                    zable z
-                                ON
-                                    z.zield = p.pield1
-                                AND
-                                    z.zield2 = p.pield3
+JOIN
+    pable p
+ON
+    p.pield = b.tield1
+AND
+    p.pield2 = b.tield3
+</textarea>
+-->
 
-                                JOIN
-                                    xable x
-                                ON
-                                    x.xield = p.pield1
-                                AND
-                                    x.xield2 = p.pield3
+            <textarea id="sqlQuery" style="height:800px">
+SELECT
+*
+FROM
+    table table
 
-                                JOIN
-                                    fffable fff
-                                ON
-                                    fff.fffield = f.field1
-                                AND
-                                    fff.fffield2 = f.field3
+left JOIN
+    aaa aaa
+ON
+    aaa.field2 = table.tield3
 
-                                WHERE
-                                    field3='val1'
-                                AND
-                                    field4=5
-                                OR
-                                    field5='val2'</textarea>
+left JOIN
+    aaa aaa
+ON
+    aaa.aield = table.tield1
+
+right JOIN
+    pable pable
+ON
+    pable.bield2 = table.tield3
+
+right JOIN
+    third third
+ON
+    third.bield = aaa.tield1
+</textarea>
+            
+<!-- 
+
+
+-->
+<!--     
+SELECT
+    t.tield1, t.tield2, t.tield3, t.tield4,
+    p.pield,
+    f.field4
+FROM
+    table t
+
+left JOIN
+    fable f
+ON
+    f.field = t.tield1
+AND
+    f.field2 = t.tield3
+right JOIN
+    pable p
+ON
+    p.pield = t.tield1
+AND
+    p.pield2 = t.tield3
+
+JOIN
+    iable i
+ON
+    i.iield = p.pield1
+AND
+    i.iield2 = p.pield3
+
+JOIN
+    zable z
+ON
+    z.zield = p.pield1
+AND
+    z.zield2 = p.pield3
+
+JOIN
+    xable x
+ON
+    x.xield = p.pield1
+AND
+    x.xield2 = p.pield3
+
+JOIN
+    fffable fff
+ON
+    fff.fffield = f.field1
+AND
+    fff.fffield2 = f.field3
+
+WHERE
+    field3='val1'
+AND
+    field4=5
+OR
+    field5='val2'
+-->
 		</div>
 	</div>
 </div>
@@ -194,7 +256,7 @@ radConv : 0.017453292519943295,
 cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
-joins : new Object(),
+joins : new Array(),
 init : function()
 {
     $('#diagramArea').svg();
@@ -287,7 +349,7 @@ binds : function()
 				msg = $.parseJSON(msg);
 				html = '';
 				$.each(msg, function(key, val) {
-					html += key + ': ' + val + '<br\/>';
+					html += key + ': ' + val + '<br \/>';
 				});
 				$('#tableInfoContent').html(html);
 			}
@@ -309,7 +371,6 @@ svgMouseup : function()
     {
 //        alert('Just dropped "' + $(V3Graph.draggedNow).attr('id') + '" on: "' + $(this).attr('id') + '"');
         V3Graph.extendJoin($(V3Graph.draggedNow).attr('id'), $(this).attr('id'));
-        V3Graph.getCoords();
     }
     else
     {
@@ -344,17 +405,47 @@ extendJoin : function(draggableId, droppableId)
         this.getJoins();
     }
 
-    this.joins.added =
+    for (var k in this.joins);
+    
+    this.joins[parseInt(k)+1] =
     {
-        from : draggableId.split(V3Graph.joinIdPrefix).join(''),
+        from : droppableId.split(V3Graph.tableIdPrefix).join(''),
         on :
         {
-            0 : {alias : '', column : '', from : draggableId.split(V3Graph.joinIdPrefix).join('')},
-            1 : {alias : '', column : '', from : droppableId.split(V3Graph.tableIdPrefix).join('')}
+            0 :
+            {
+                0 : { from : draggableId.split(V3Graph.joinIdPrefix).join(''), alias : draggableId.split(V3Graph.joinIdPrefix).join(''), column : 'alfa'},
+                1 : { from : droppableId.split(V3Graph.tableIdPrefix).join(''), alias : droppableId.split(V3Graph.tableIdPrefix).join(''), column : 'beta'},
+                junction: '='
+            }
         },
-        to : { name : droppableId.split(V3Graph.tableIdPrefix).join('') },
+        to : { name : draggableId.split(V3Graph.joinIdPrefix).join(''),  alias : draggableId.split(V3Graph.joinIdPrefix).join('') },
         type : 'inner'
+//        from : droppableId.split(V3Graph.tableIdPrefix).join(''),
+//        on :
+//        {
+//            0 :
+//            {
+//                0 : { from : draggableId.split(V3Graph.joinIdPrefix).join(''), alias : draggableId.split(V3Graph.joinIdPrefix).join('').substr(0, 3), column : 'alfa'},
+//                1 : { from : droppableId.split(V3Graph.tableIdPrefix).join(''), alias : droppableId.split(V3Graph.tableIdPrefix).join('').substr(0, 3), column : 'beta'},
+//                junction: '='
+//            }
+//        },
+//        to : { name : draggableId.split(V3Graph.joinIdPrefix).join(''),  alias : draggableId.split(V3Graph.joinIdPrefix).join('').substr(0, 3) },
+//        type : 'inner'
     };
+
+    this.getQuery();
+    this.init();
+    
+//    this.getCoords();
+//    this.getJoins();
+//
+//    for (var first in this.cords)
+//    {
+//        this.draw(this.cords[first]);
+//    }
+//    this.binds();
 },
 
 getCoords : function()
@@ -405,9 +496,6 @@ getQuery : function()
         success: function(msg)
         {
             var query = msg;
-
-//            V3Graph.query = query;
-
             $('#sqlQuery').val(query);
         }
     });
