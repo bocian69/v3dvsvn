@@ -75,8 +75,8 @@ AND
     p.pield2 = b.tield3
 </textarea>
 -->
+<!-- 
 
-            <textarea id="sqlQuery" style="height:800px">
 SELECT
 *
 FROM
@@ -101,12 +101,9 @@ right JOIN
     third third
 ON
     third.bield = aaa.tield1
-</textarea>
-            
-<!-- 
-
 
 -->
+
 <!--     
 SELECT
     t.tield1, t.tield2, t.tield3, t.tield4,
@@ -163,6 +160,21 @@ AND
 OR
     field5='val2'
 -->
+<textarea id="sqlQuery" style="height:800px">
+SELECT
+* 
+FROM
+ksiazki ksiazki 
+JOIN 
+kategorie kategorie
+ON
+ksiazki.idKategoria = kategorie.id
+JOIN
+tagbook_join tagbook_join
+ON
+tagbook_join.idKsiazka = ksiazki.id
+</textarea>
+   
 		</div>
 	</div>
 </div>
@@ -173,6 +185,9 @@ OR
 	</div>
 	<div id="dataInfoContent">
 	</div>
+</div>
+
+<div id="pickJoinOn" style="display:none;width:300px;height:300px">
 </div>
 
 {literal}
@@ -257,6 +272,9 @@ cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
 joins : new Array(),
+table1SelectedToPickConstraint : false,
+table2SelectedToPickConstraint : false,
+
 init : function()
 {
     $('#diagramArea').svg();
@@ -299,7 +317,7 @@ draw : function(cords)
                 .arc(cords.coords.rM, cords.coords.rM, 0,0,0, cords.coords.start.xM, cords.coords.start.yM)
                 .line(cords.coords.start.xS, cords.coords.start.yS)
                 .close(),
-            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from}
+            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from}
             );
         var path = svg.createPath();
         svg.path(
@@ -310,7 +328,7 @@ draw : function(cords)
                 .arc(cords.coords.rL, cords.coords.rL, 0,0,0, cords.coords.start.xL, cords.coords.start.yL)
                 .line(cords.coords.start.xM, cords.coords.start.yM)
                 .close(),
-            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from}
+            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from}
             );
     }
     for (var kk in cords.children)
@@ -345,12 +363,13 @@ binds : function()
 				action: 'getTableInfo',
 				table: $(this).attr('id')
 			},
-			success: function(msg){
+			success: function(msg)
+            {
 				msg = $.parseJSON(msg);
 				html = '';
 				$.each(msg, function(key, val) {
 					html += key + ': ' + val + '<br \/>';
-				});
+                });
 				$('#tableInfoContent').html(html);
 			}
 		});
@@ -363,6 +382,23 @@ binds : function()
         .bind('mouseout', this.svgOut);
 
     $('.JSgraphElement', this.svg.root());
+    
+	$('.JSfancy').fancybox(
+    {
+        'content' : $('#pickJoinOn').html(),
+        'type' : 'ajax',
+        'href' : MainPath + '/Ajax',
+        'ajax' : 
+        {
+            type: 'POST',
+        }
+    });
+//            definiowane w jquery.fancybox-....
+//            data : {
+//                action: 'getTablesColumns',
+//                table1: this.table1SelectedToPickConstraint,
+//                table2: this.table2SelectedToPickConstraint
+//            }
 },
 
 svgMouseup : function()
@@ -376,7 +412,7 @@ svgMouseup : function()
     {
         if (false === V3Graph.draggedNow)
         {
-            alert('I\'m "' + $(this).attr('id') + '"! You have clicked me.');
+//            alert('I\'m "' + $(this).attr('id') + '"! You have clicked me.');
         }
     }
 },
@@ -421,31 +457,10 @@ extendJoin : function(draggableId, droppableId)
         },
         to : { name : draggableId.split(V3Graph.joinIdPrefix).join(''),  alias : draggableId.split(V3Graph.joinIdPrefix).join('') },
         type : 'inner'
-//        from : droppableId.split(V3Graph.tableIdPrefix).join(''),
-//        on :
-//        {
-//            0 :
-//            {
-//                0 : { from : draggableId.split(V3Graph.joinIdPrefix).join(''), alias : draggableId.split(V3Graph.joinIdPrefix).join('').substr(0, 3), column : 'alfa'},
-//                1 : { from : droppableId.split(V3Graph.tableIdPrefix).join(''), alias : droppableId.split(V3Graph.tableIdPrefix).join('').substr(0, 3), column : 'beta'},
-//                junction: '='
-//            }
-//        },
-//        to : { name : draggableId.split(V3Graph.joinIdPrefix).join(''),  alias : draggableId.split(V3Graph.joinIdPrefix).join('').substr(0, 3) },
-//        type : 'inner'
     };
 
     this.getQuery();
     this.init();
-    
-//    this.getCoords();
-//    this.getJoins();
-//
-//    for (var first in this.cords)
-//    {
-//        this.draw(this.cords[first]);
-//    }
-//    this.binds();
 },
 
 getCoords : function()
@@ -499,6 +514,12 @@ getQuery : function()
             $('#sqlQuery').val(query);
         }
     });
+},
+
+markConstraintChoises : function(invoker)
+{
+    event.preventDefault();
+    console.log(invoker);
 }
 }
 

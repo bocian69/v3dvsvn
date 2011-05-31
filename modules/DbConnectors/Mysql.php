@@ -8,8 +8,17 @@ Class Mysql extends Db {
 		//$this->registry['db']->debug=1;
 	}
 	
-	function showColumns() {
-		
+	function showColumns($table) {
+        $sql = "SHOW COLUMNS FROM " . addslashes($table);
+		$res = $this->db->Execute($sql);
+        foreach ($res as $r) 
+        {
+			$tables[] = array(
+                'field' => $r['Field'],
+                'type' => $r['Type']
+            );
+		}
+        return $tables;
 	}
 	
 	function tableInfo($table) {

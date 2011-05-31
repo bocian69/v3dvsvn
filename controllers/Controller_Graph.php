@@ -284,11 +284,11 @@ Class Controller_Graph Extends Controller_Base
     private function parseFrom()
     {
         $string = $this->dispatchedFrom;
-        preg_match_all('/(\w+(\.|\s){0,1}\w+|\=)/ims', strtolower($string), $matches);
+        preg_match_all('/(SELECT|AND|FROM|ON|JOIN|\w+(\.|\s){0,1}\w+|\=)/ims', strtolower($string), $matches);// (SELECT|AND|FROM|ON|JOIN|\w+(\.|\s){0,1}\w+|\=)
         $onWriteFlag = false;
         $andWriteFlag = false;
         $onCount = 0;
-
+        
         foreach ($matches[0] as $k=>$v)
         {
             if (in_array($v, array('from')))

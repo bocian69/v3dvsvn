@@ -18,6 +18,8 @@
 <script type="text/javascript" src="{$js_path}jquery/jquery-ui-1.8.11.custom.min.js"></script>
 <script type="text/javascript" src="{$js_path}jquery.svg.js"></script>
 
+<script type="text/javascript" src="{$js_path}fancybox/jquery.fancybox-1.3.4.js"></script>
+<link rel="stylesheet" href="{$js_path}fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
 
 <script type="text/javascript">
 var MainPath = "{$main_path}";
