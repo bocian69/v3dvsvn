@@ -272,8 +272,14 @@ cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
 joins : new Array(),
+//element na ktory upuszczamy
 table1SelectedToPickConstraint : false,
+constraintOfTable1SelectedToPickConstraint : false,
+//element upuszczanego
 table2SelectedToPickConstraint : false,
+constraintOfTable2SelectedToPickConstraint : false,
+
+junctionOfTablesSelectedToPickConstraint : false,
 
 init : function()
 {
@@ -391,6 +397,37 @@ binds : function()
         'ajax' : 
         {
             type: 'POST',
+            complete : function()
+            {
+                $('.JSconstraintOfTable1SelectedToPickConstraint').bind('change', function(){V3Graph.constraintOfTable1SelectedToPickConstraint = $(this).find('option:selected').val();});
+                $('.JSconstraintOfTable2SelectedToPickConstraint').bind('change', function(){V3Graph.constraintOfTable2SelectedToPickConstraint = $(this).find('option:selected').val();});
+                $('.JSjunctionOfTablesSelectedToPickConstraint').bind('change', function(){V3Graph.junctionOfTablesSelectedToPickConstraint = $(this).find('option:selected').val();});
+                
+                V3Graph.constraintOfTable1SelectedToPickConstraint = $('.JSconstraintOfTable1SelectedToPickConstraint').find('option:selected').val();  
+                V3Graph.constraintOfTable2SelectedToPickConstraint = $('.JSconstraintOfTable2SelectedToPickConstraint').find('option:selected').val();  
+                V3Graph.junctionOfTablesSelectedToPickConstraint = $('.JSjunctionOfTablesSelectedToPickConstraint').find('option:selected').val();    
+         
+                $('a.JSmarkConstraintChoises').bind('click', function(event)
+                {
+                    event.preventDefault();
+                    V3Graph.extendJoin();
+                    //zamkniecie fancy przeniesione do powyzszej funkcji
+                });
+                
+                $('a.JScancelConstraintChoises').bind('click', function(event)
+                {
+                    event.preventDefault();  
+                    $.fancybox.close();
+                });
+                
+            }
+        },
+        'onClose' : function() 
+        {
+            console.log(1);
+            V3Graph.constraintOfTable1SelectedToPickConstraint = false;  
+            V3Graph.constraintOfTable2SelectedToPickConstraint = false;  
+            V3Graph.junctionOfTablesSelectedToPickConstraint = false;  
         }
     });
 //            definiowane w jquery.fancybox-....
@@ -406,7 +443,7 @@ svgMouseup : function()
     if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp') && false !== V3Graph.draggedNow)
     {
 //        alert('Just dropped "' + $(V3Graph.draggedNow).attr('id') + '" on: "' + $(this).attr('id') + '"');
-        V3Graph.extendJoin($(V3Graph.draggedNow).attr('id'), $(this).attr('id'));
+//        V3Graph.extendJoin($(V3Graph.draggedNow).attr('id'), $(this).attr('id'));
     }
     else
     {
@@ -434,8 +471,13 @@ svgOut : function()
     $(this).attr({'opacity': '1',fill: '#aaa'});
 },
 
-extendJoin : function(draggableId, droppableId)
+extendJoin : function()
 {
+    if (false === this.table1SelectedToPickConstraint || false === this.table2SelectedToPickConstraint)
+    {
+        return false;
+    }
+    
     if ('undefined' == typeof this.joins)
     {
         this.getJoins();
@@ -445,22 +487,25 @@ extendJoin : function(draggableId, droppableId)
     
     this.joins[parseInt(k)+1] =
     {
-        from : droppableId.split(V3Graph.tableIdPrefix).join(''),
+        from : this.table2SelectedToPickConstraint,
         on :
         {
             0 :
             {
-                0 : { from : draggableId.split(V3Graph.joinIdPrefix).join(''), alias : draggableId.split(V3Graph.joinIdPrefix).join(''), column : 'alfa'},
-                1 : { from : droppableId.split(V3Graph.tableIdPrefix).join(''), alias : droppableId.split(V3Graph.tableIdPrefix).join(''), column : 'beta'},
+                0 : { from : this.table1SelectedToPickConstraint, alias : this.table1SelectedToPickConstraint, column : 'alfa'},
+                1 : { from : this.table2SelectedToPickConstraint, alias : this.table2SelectedToPickConstraint, column : 'beta'},
                 junction: '='
             }
         },
-        to : { name : draggableId.split(V3Graph.joinIdPrefix).join(''),  alias : draggableId.split(V3Graph.joinIdPrefix).join('') },
+        to : { name :  this.table1SelectedToPickConstraint,  alias : this.table1SelectedToPickConstraint },
         type : 'inner'
     };
 
     this.getQuery();
     this.init();
+    
+    //dla kolejnosci akcji przeniesione tutaj
+    $.fancybox.close();
 },
 
 getCoords : function()
