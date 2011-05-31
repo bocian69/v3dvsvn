@@ -72,6 +72,9 @@ class Controller_Ajax Extends Controller_Base {
         
         $html_returned = "<center>pick join on </center><br />";
         
+        $html_returned .= '<p><div style="width:40%;float:left"><center>' . $_POST['table1'] . '</center></div>';
+        $html_returned .= '<div style="width:40%;float:right"><center>' . $_POST['table2'] . '</center></div></p>';
+        
         //table 1
         $html_returned .= '<select class="JSdropOf___' . $_POST['table1'] . ' JSconstraintOfTable1SelectedToPickConstraint">';
         foreach ($columns1 as $options1)

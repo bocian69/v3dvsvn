@@ -87,7 +87,7 @@ Class Controller_Graph Extends Controller_Base
                 {
                     foreach($v2 as $k3 => $v3)
                     {
-                        if (is_int($k3) and $v['to'] != $v3['from'])
+                        if ( is_int($k3) and $v['to']['name'] != $v3['from'])
                         {
                             $from = $v3['from'];
                         }

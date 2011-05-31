@@ -272,14 +272,6 @@ cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
 joins : new Array(),
-//element na ktory upuszczamy
-table1SelectedToPickConstraint : false,
-constraintOfTable1SelectedToPickConstraint : false,
-//element upuszczanego
-table2SelectedToPickConstraint : false,
-constraintOfTable2SelectedToPickConstraint : false,
-
-junctionOfTablesSelectedToPickConstraint : false,
 
 init : function()
 {
@@ -310,7 +302,6 @@ joinIdPrefix : 'JS__V3DV__join__',
 draw : function(cords)
 {
     var svg = this.svg;
-    var cords = cords;
 
     if ( 0 != cords.level)
     {
@@ -471,6 +462,16 @@ svgOut : function()
     $(this).attr({'opacity': '1',fill: '#aaa'});
 },
 
+
+//element na ktory upuszczamy
+table1SelectedToPickConstraint : false,
+constraintOfTable1SelectedToPickConstraint : false,
+//element upuszczanego
+table2SelectedToPickConstraint : false,
+constraintOfTable2SelectedToPickConstraint : false,
+
+junctionOfTablesSelectedToPickConstraint : false,
+
 extendJoin : function()
 {
     if (false === this.table1SelectedToPickConstraint || false === this.table2SelectedToPickConstraint)
@@ -487,17 +488,17 @@ extendJoin : function()
     
     this.joins[parseInt(k)+1] =
     {
-        from : this.table2SelectedToPickConstraint,
+        from : this.table1SelectedToPickConstraint,
         on :
         {
             0 :
             {
-                0 : { from : this.table1SelectedToPickConstraint, alias : this.table1SelectedToPickConstraint, column : 'alfa'},
-                1 : { from : this.table2SelectedToPickConstraint, alias : this.table2SelectedToPickConstraint, column : 'beta'},
-                junction: '='
+                0 : { from : this.table1SelectedToPickConstraint, alias : this.table1SelectedToPickConstraint, column : this.constraintOfTable1SelectedToPickConstraint},
+                1 : { from : this.table2SelectedToPickConstraint, alias : this.table2SelectedToPickConstraint, column : this.constraintOfTable2SelectedToPickConstraint},
+                junction: this.junctionOfTablesSelectedToPickConstraint
             }
         },
-        to : { name :  this.table1SelectedToPickConstraint,  alias : this.table1SelectedToPickConstraint },
+        to : { name :  this.table2SelectedToPickConstraint,  alias : this.table2SelectedToPickConstraint },
         type : 'inner'
     };
 
