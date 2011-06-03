@@ -118,6 +118,7 @@ Class Controller_Index Extends Controller_Base {
      */
 
     function Graph($args = array()) {
+    	$this->index(true);
     	$Graph = new Controller_Graph($this->registry);
     	$Graph->setArgs($args);
     	$Graph->index();
