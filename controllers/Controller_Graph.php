@@ -1,4 +1,4 @@
-<?
+<?php
 
 Class Controller_Graph Extends Controller_Base
 {
@@ -76,7 +76,7 @@ Class Controller_Graph Extends Controller_Base
     /**
      *  Pobranie zdispachowanego zapytania
      */
-    public function getJoins()
+    public function getJoinsAndAliases()
     {
         if (false !== $this->noConstructorNoFun())
         {
@@ -92,7 +92,7 @@ Class Controller_Graph Extends Controller_Base
                             $from = $v3['from'];
                         }
                     }
-                    $return_clean[] = array(
+                    $joins[] = array(
                         'from' => $from,
                         'to' => $v['to'],
                         'on' => array($v2),
@@ -100,6 +100,11 @@ Class Controller_Graph Extends Controller_Base
                     );
                 }
             }
+            
+            $return_clean['joins'] = $joins;
+            
+            $return_clean['aliases'] = $this->aliases;
+            
             $return = json_encode($return_clean);
         }
         else
@@ -172,7 +177,14 @@ Class Controller_Graph Extends Controller_Base
         $this->reparsedSelect = "SELECT \n\t";
         foreach($this->parsedQuery['select'] as $v)
         {
-            $this->reparsedSelect .= " " . $v['alias'] . "." . $v['name'] . ",";
+            if ($v['name'] == '*')
+            {
+                $this->reparsedSelect .= $v['name'] . ",";
+            }
+            else
+            {
+                $this->reparsedSelect .= " " . $this->aliases[$v['name']] . "." . $v['name'] . ",";
+            }
         }
         $this->reparsedSelect = substr($this->reparsedSelect, 0, strlen($this->reparsedSelect)-1);
     }
@@ -182,8 +194,13 @@ Class Controller_Graph Extends Controller_Base
      */
     private function reparseFrom()
     {
+        
+        if ($this->aliases[$this->parsedQuery['from']['name']] != $this->parsedQuery['from']['alias'])
+        {
+            $this->aliasesMapper[$this->parsedQuery['from']['alias']] = $this->aliases[$this->parsedQuery['from']['name']];
+        }
         $this->reparsedFrom = "\nFROM \n\t";
-        $this->reparsedFrom .= " " . $this->parsedQuery['from']['name'] . " " . $this->parsedQuery['from']['alias'];
+        $this->reparsedFrom .= " " . $this->parsedQuery['from']['name'] . " " . $this->aliases[$this->parsedQuery['from']['name']];//$this->parsedQuery['from']['alias'];
     }
 
     /**
@@ -194,11 +211,26 @@ Class Controller_Graph Extends Controller_Base
         $this->reparsedJoin = "";
         foreach($this->parsedQuery['join'] as $k => $v)
         {
+//            if ($this->aliases[$v['to']['name']] != $v['to']['alias'])
+//            {
+//                $this->aliasesMapper[$v['to']['alias']] = $this->aliases[$v['to']['name']];
+//            }
+
             $this->reparsedJoin .= "\n" . strtoupper($v['type']) . " JOIN ";
-            $this->reparsedJoin .= "\n\t" . $v['to']['name'] . " " . $v['to']['alias'] . "\n";
+            $this->reparsedJoin .= "\n\t" . $v['to']['name'] . " " . $this->aliases[$v['to']['name']] . "\n";
             $this->reparsedJoin .= "ON";
             foreach ($v['on'] as $vv)
-            {
+            {       
+                //opcjonalne mapowanie aliasu uzytego w zapytaniu na zparsowane z bazy
+//                if (isset($this->aliasesMapper[$vv[0]['alias']]))
+//                {
+//                    $vv[0]['alias'] = $this->aliasesMapper[$vv[0]['alias']];
+//                }
+//                if (isset($this->aliasesMapper[$vv[1]['alias']]))
+//                {
+//                    $vv[1]['alias'] = $this->aliasesMapper[$vv[1]['alias']];
+//                }
+
                 $this->reparsedJoin .= "\n\t" . $vv[0]['alias'] . "." . $vv[0]['column'] . " " . $vv['junction'] . " " . $vv[1]['alias'] . "." . $vv[1]['column'] . "\n";
                 $this->reparsedJoin .= "AND";
             }
@@ -225,6 +257,22 @@ Class Controller_Graph Extends Controller_Base
         if (isset($_POST['query']))
         {
             $this->sql_query = $_POST['query'];
+            
+            if (false !== ($tables = $this->registry['db']->showTables()))
+            {
+                foreach ($tables as $v)
+                {
+                    $this->aliasesTables[substr($v, 0, 1)][] = $v;
+                }
+                
+                foreach ($this->aliasesTables as $k => $v)
+                {
+                    foreach ($v as $k1 => $v1)
+                    {
+                        $this->aliases[$v1] = $k . (!empty($k1) ? (string)$k1 : '');
+                    }
+                }
+            }
             return true;
         }
         else
@@ -288,7 +336,7 @@ Class Controller_Graph Extends Controller_Base
         $onWriteFlag = false;
         $andWriteFlag = false;
         $onCount = 0;
-        
+
         foreach ($matches[0] as $k=>$v)
         {
             if (in_array($v, array('from')))
@@ -297,12 +345,23 @@ Class Controller_Graph Extends Controller_Base
             }
             else if ( empty($this->sectionFrom['from']))
             {
-                $temp = explode(' ', $v);
+                //rozdzielamy nazwe tabeli od aliasu
+                if (false === ($temp = explode(' ', $v)))
+                {
+                    $temp[0] = $v;
+                    $temp[1] = '';
+                }
+                    
+                if ($this->aliases[$temp[0]] != $temp[1])
+                {
+                    $this->aliasesMapper[$temp[1]] = $this->aliases[$temp[0]];
+                }
+                
                 $this->sectionFrom['from'] = array(
-                    'name' => isset($temp[0]) ? $temp[0] : '',
-                    'alias' => isset($temp[1]) ? $temp[1] : ''
+                    'name' => $temp[0],
+                    'alias' => $this->aliases[$temp[0]]
                 );
-                $this->aliases[(isset($temp[1]) ? $temp[1] : '')] = isset($temp[0]) ? $temp[0] : '';
+                
                 $this->mainTable = $temp[0];
                 unset($temp);
             }
@@ -343,12 +402,22 @@ Class Controller_Graph Extends Controller_Base
             {
                 if ( empty($this->sectionFrom['join'][$joinOpenToWrite]['to']))
                 {
-                    $temp = explode(' ', $v);
+                    //rozdzielamy nazwe tabeli od aliasu
+                    if (false === ($temp = explode(' ', $v)))
+                    {
+                        $temp[0] = $v;
+                        $temp[1] = '';
+                    }
+                    
+                    if ($this->aliases[$temp[0]] != $temp[1])
+                    {
+                        $this->aliasesMapper[$temp[1]] = $this->aliases[$temp[0]];
+                    }
                     $this->sectionFrom['join'][$joinOpenToWrite]['to'] = array(
-                        'name' => isset($temp[0]) ? $temp[0] : '',
-                        'alias' =>isset($temp[1]) ? $temp[1] : ''
+                        'name' => $temp[0],
+                        'alias' => $this->aliases[$temp[0]]
                     );
-                    $this->aliases[(isset($temp[1]) ? $temp[1] : '')] = isset($temp[0]) ? $temp[0] : '';
+                    
                     unset($temp);
                 }
                 else if (in_array($v, array('on','and')))
@@ -371,15 +440,46 @@ Class Controller_Graph Extends Controller_Base
                         $this->sectionFrom['join'][$joinOpenToWrite]['on'][$onCount]['junction'] = $v;
                         continue;
                     }
+                    
+//                    print_r($v."\n\n");
+//                    print_r($this->aliases);
+//                    print_r($this->aliasesMapper);
+                    
+                    //rozdzielamy nazwe tabeli od aliasu
+                    if (false === ($temp = explode('.', $v)))
+                    {
+                        $temp[1] = $v;
+                        $temp[0] = '';
+                    }
+//                    print_r($temp[0] . " turned into: ");
+                    //opcjonalne mapowanie aliasu uzytego w zapytaniu na zparsowane z bazy
+                    if (isset($this->aliasesMapper[$temp[0]]))
+                    {
+                        $temp[0] = $this->aliasesMapper[$temp[0]];
+                    }
+//                    print_r($temp[0] . "\n\n----------------------------------------\n\n");
+                    
+                    switch(strlen($temp[0]))
+                    {
+                        case (1 < strlen($temp[0])):
+                            $shortAlias = substr($temp[0], 0, 1);
+                            $aliasNumber = (int)substr($temp[0], 1);
+                            break;
+                        default:
+                            $shortAlias = $temp[0];
+                            $aliasNumber = 0;
+                            break;
+                    }
 
-                    $temp = explode('.', $v);
+                    $from = $this->aliasesTables[$shortAlias][$aliasNumber];
+                            
                     $this->sectionFrom['join'][$joinOpenToWrite]['on'][$onCount][] = array(
-                        'column' => isset($temp[1]) ? $temp[1] : '',
-                        'from' => (isset($temp[0]) and isset($this->aliases[$temp[0]])) ? $this->aliases[$temp[0]] : '',
-                        'alias' => isset($temp[0]) ? $temp[0] : ''
+                        'column' => $temp[1],
+                        'from' => $from,
+                        'alias' => $temp[0]
                     );
-
-                    unset($temp);
+                    
+                    unset($temp,$aliasNumber,$shortAlias);
                 }
 //                else if (true === $andWriteFlag)
 //                {
@@ -454,7 +554,7 @@ Class Controller_Graph Extends Controller_Base
     {
         $this->coords[$this->parsedQuery['from']['name']]['level'] = 0;
         $this->coords[$this->parsedQuery['from']['name']]['children'] = $this->countLevels($this->parsedQuery['from']['name']);
-        
+
         $this->coordsCounted = $this->coords;
         $this->countMetrics($this->coords, $this->coordsCounted);
         

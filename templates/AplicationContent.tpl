@@ -164,18 +164,18 @@ OR
 SELECT
 * 
 FROM
-ksiazki ksiazki 
+ksiazki k 
 JOIN 
-kategorie kategorie
+kategorie k1
 ON
-ksiazki.idKategoria = kategorie.id
+k.idKategoria = k1.id
 JOIN
-tagbook_join tagbook_join
+tagbook_join t
 ON
-tagbook_join.idKsiazka = ksiazki.id
+t.idKsiazka = k.id
 </textarea>
-   
-		</div>
+
+        </div>
 	</div>
 </div>
 
@@ -282,18 +282,13 @@ init : function()
     /* kolko centrum - red */
     this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'red', strokeWidth: 1, id: 'mainCircle'});
     this.getCoords();
-    this.getJoins()
+    this.getJoins();
 
     for (var first in this.cords)
     {
         this.draw(this.cords[first]);
     }
     this.binds();
-},
-
-drawFromCords : function()
-{
-    this.draw();
 },
 
 tableIdPrefix : 'JS__V3DV__table__',
@@ -415,18 +410,11 @@ binds : function()
         },
         'onClose' : function() 
         {
-            console.log(1);
             V3Graph.constraintOfTable1SelectedToPickConstraint = false;  
             V3Graph.constraintOfTable2SelectedToPickConstraint = false;  
             V3Graph.junctionOfTablesSelectedToPickConstraint = false;  
         }
     });
-//            definiowane w jquery.fancybox-....
-//            data : {
-//                action: 'getTablesColumns',
-//                table1: this.table1SelectedToPickConstraint,
-//                table2: this.table2SelectedToPickConstraint
-//            }
 },
 
 svgMouseup : function()
@@ -493,12 +481,12 @@ extendJoin : function()
         {
             0 :
             {
-                0 : { from : this.table1SelectedToPickConstraint, alias : this.table1SelectedToPickConstraint, column : this.constraintOfTable1SelectedToPickConstraint},
-                1 : { from : this.table2SelectedToPickConstraint, alias : this.table2SelectedToPickConstraint, column : this.constraintOfTable2SelectedToPickConstraint},
+                0 : { from : this.table1SelectedToPickConstraint, alias : this.aliases[this.table1SelectedToPickConstraint], column : this.constraintOfTable1SelectedToPickConstraint},
+                1 : { from : this.table2SelectedToPickConstraint, alias : this.aliases[this.table2SelectedToPickConstraint], column : this.constraintOfTable2SelectedToPickConstraint},
                 junction: this.junctionOfTablesSelectedToPickConstraint
             }
         },
-        to : { name :  this.table2SelectedToPickConstraint,  alias : this.table2SelectedToPickConstraint },
+        to : { name :  this.table2SelectedToPickConstraint,  alias : this.aliases[this.table2SelectedToPickConstraint] },
         type : 'inner'
     };
 
@@ -529,7 +517,7 @@ getCoords : function()
 
 getJoins : function()
 {
-    var postData = {action : 'getJoins', query : $('#sqlQuery').val()};
+    var postData = {action : 'getJoinsAndAliases', query : $('#sqlQuery').val()};
 
     $.ajax({
         type: "POST",
@@ -538,9 +526,10 @@ getJoins : function()
         data: postData,
         success: function(msg)
         {
-            var joins = jQuery.parseJSON(msg);
+            var msg = jQuery.parseJSON(msg);
 
-            V3Graph.joins = joins;
+            V3Graph.joins = msg.joins;
+            V3Graph.aliases = msg.aliases;
         }
     });
 },
