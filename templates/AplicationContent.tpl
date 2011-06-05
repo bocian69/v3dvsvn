@@ -1,5 +1,5 @@
 <div id="mainContent">
-	<div id="tables">
+	<div id="tables" style="overflow: auto">
 	{foreach from=$tables item=table}
 		<div class="tableName dnd" id="{$table}">
 		{$table}
@@ -160,8 +160,7 @@ AND
 OR
     field5='val2'
 -->
-<textarea id="sqlQuery" style="height:800px">
-SELECT
+<!--SELECT
 * 
 FROM
 ksiazki k 
@@ -172,7 +171,9 @@ k.idKategoria = k1.id
 JOIN
 tagbook_join t
 ON
-t.idKsiazka = k.id
+t.idKsiazka = k.id-->
+<textarea id="sqlQuery" style="height:800px">
+
 </textarea>
 
         </div>
@@ -278,17 +279,49 @@ cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
 joins : new Array(),
+noNeedToBindDiagramArea : false,
+
+drawCircle : function()
+{
+    $("#diagramArea").droppable( 'disable' );
+
+    this.noNeedToBindDiagramArea = true;
+    this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'gray', strokeWidth: 1, id: this.tableIdPrefix + this.draggedNow.attr('id') + "___" + this.draggedNow.attr('id').substr(0, 1), class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
+    
+    $('#sqlQuery').text('SELECT * FROM ' + this.draggedNow.attr('id') + ' ' + this.draggedNow.attr('id').substr(0, 1) + ' ');
+    
+    this.binds();
+},
 
 init : function()
 {
     $('#diagramArea').svg();
     this.svg = $('#diagramArea').svg('get');
     this.svg.clear();
-
-    /* kolko centrum - red */
-    this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'red', strokeWidth: 1, id: 'mainCircle'});
+    if (this.noNeedToBindDiagramArea == false)
+    {
+        $("#diagramArea").droppable({
+            activeClass: "ui-state-default",
+            hoverClass: "ui-state-hover",
+            accept: ":not(.ui-sortable-helper)",
+            drop: function( event, ui ) 
+            {
+                V3Graph.drawCircle();
+            }
+        });
+    }
+    
     this.getCoords();
     this.getJoins();
+
+    for (var k in this.cords)
+    {
+        if ('' != k)
+        {
+            this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'gray', strokeWidth: 1, id: this.tableIdPrefix + k + "___" + this.cords[k].alias, class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
+        }
+    }
+    
 
     for (var first in this.cords)
     {
@@ -383,7 +416,7 @@ binds : function()
 		});
 	});
         /* bindy */
-
+      
      $('.JSgraphElement', this.svg.root())
         .bind('mouseup', this.svgMouseup)
         .bind('mouseover', this.svgOver)
@@ -510,49 +543,6 @@ setAliasUsed : function(aliasToCheck, addition)
     return aliasToSet;
 },
 
-extendJoin : function()
-{
-    if (false === this.table1SelectedToPickConstraint || false === this.table2SelectedToPickConstraint)
-    {
-        return false;
-    }
-    
-    if ('undefined' == typeof this.joins)
-    {
-        this.getJoins();
-    }
-
-    for (var k in this.joins)
-    {
-        this.aliasesUsed[this.joins[k].to.alias] = true;
-    }
-    var alias1 = this.table1SelectedToPickConstraint[1];
-
-    var alias2 = this.setAliasUsed( this.aliases[this.table2SelectedToPickConstraint[0]]);
-
-    this.joins[parseInt(k)+1] =
-    {
-        from : this.table1SelectedToPickConstraint[0],
-        to : { name :  this.table2SelectedToPickConstraint[0],  alias : alias2 },
-        on :
-        {
-            0 :
-            {
-                0 : { from : this.table1SelectedToPickConstraint[0], alias : alias1, column : this.constraintOfTable1SelectedToPickConstraint},
-                1 : { from : this.table2SelectedToPickConstraint[0], alias : alias2, column : this.constraintOfTable2SelectedToPickConstraint},
-                junction: this.junctionOfTablesSelectedToPickConstraint
-            }
-        },
-        type : 'inner'
-    };
-
-    this.getQuery();
-    this.init();
-    
-    //dla kolejnosci akcji przeniesione tutaj
-    $.fancybox.close();
-},
-
 getCoords : function()
 {
     var postData = {action : 'getCoords', query : $('#sqlQuery').val()};
@@ -592,7 +582,7 @@ getJoins : function()
 
 getQuery : function()
 {
-    var postData = {action : 'getQuery', query : $('#sqlQuery').val(), joins : this.joins};
+    var postData = {action : 'getQuery', query : $('#sqlQuery').val(), joins : this.joins, idAndAlias : this.idAndAlias};
 
     $.ajax({
         type: "POST",
@@ -613,11 +603,82 @@ markConstraintChoises : function(invoker)
     console.log(invoker);
 },
 
-removeTableFromGraph : function(invokers_id)
+extendJoin : function()
+{
+    if (false === this.table1SelectedToPickConstraint || false === this.table2SelectedToPickConstraint)
+    {
+        return false;
+    }
+    
+    if ('undefined' == typeof this.joins)
+    {
+        this.getJoins();
+    }
+
+    for (var k in this.joins)
+    {
+        this.aliasesUsed[this.joins[k].to.alias] = true;
+    }
+    var alias1 = this.table1SelectedToPickConstraint[1];
+
+    var alias2 = this.setAliasUsed( this.aliases[this.table2SelectedToPickConstraint[0]]);
+
+    if ('undefined' == typeof this.joins)
+    {
+        this.joins = new Object();
+        k = -1;
+    }
+    this.joins[parseInt(k)+1] =
+    {
+        from : this.table1SelectedToPickConstraint[0],
+        to : { name :  this.table2SelectedToPickConstraint[0],  alias : alias2 },
+        on :
+        {
+            0 :
+            {
+                0 : { from : this.table1SelectedToPickConstraint[0], alias : alias1, column : this.constraintOfTable1SelectedToPickConstraint},
+                1 : { from : this.table2SelectedToPickConstraint[0], alias : alias2, column : this.constraintOfTable2SelectedToPickConstraint},
+                junction: this.junctionOfTablesSelectedToPickConstraint
+            }
+        },
+        type : 'inner'
+    };
+
+    this.getQuery();
+    this.init();
+    
+    //dla kolejnosci akcji przeniesione tutaj
+    $.fancybox.close();
+},
+
+idAndAlias : false,
+
+removeTableFromGraph : function(invokersId)
 {
     event.preventDefault();
+        
+    if ('undefined' == typeof this.joins)
+    {
+        this.getJoins();
+    }
     
-    alert('remove action geos here PAMIETEJ ABY DOROBIC: obluge jednego okregu i obluge pierwszego elementu RED CIRCLE');
+    temp = invokersId.split(V3Graph.joinIdPrefix).join('');
+    this.idAndAlias = temp.split('___');
+    temp = '';
+    
+    for (var k in this.joins)
+    {
+        if (this.joins[k].to.alias == this.idAndAlias[1] && this.joins[k].to.name == this.idAndAlias[0])
+        {
+            delete this.joins[k];
+        }
+    }
+
+    this.getQuery();
+    this.init();
+    
+    //dla kolejnosci akcji przeniesione tutaj
+    $.fancybox.close();
 }
 }
 

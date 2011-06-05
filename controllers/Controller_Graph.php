@@ -81,27 +81,30 @@ Class Controller_Graph Extends Controller_Base
         if (false !== $this->noConstructorNoFun())
         {
             $this->sqlToArray();
-            foreach($this->parsedQuery['join'] as $v)
+            if (!empty($this->parsedQuery['join']))
             {
-                foreach($v['on'] as $k2 => $v2)
+                foreach($this->parsedQuery['join'] as $v)
                 {
-                    foreach($v2 as $k3 => $v3)
+                    foreach($v['on'] as $k2 => $v2)
                     {
-                        if ( is_int($k3) and $v['to']['name'] != $v3['from'])
+                        foreach($v2 as $k3 => $v3)
                         {
-                            $from = $v3['from'];
+                            if ( is_int($k3) and $v['to']['name'] != $v3['from'])
+                            {
+                                $from = $v3['from'];
+                            }
                         }
+                        $joins[] = array(
+                            'from' => $from,
+                            'to' => $v['to'],
+                            'on' => array($v2),
+                            'type' => $v['type']
+                        );
                     }
-                    $joins[] = array(
-                        'from' => $from,
-                        'to' => $v['to'],
-                        'on' => array($v2),
-                        'type' => $v['type']
-                    );
                 }
+
+                $return_clean['joins'] = $joins;
             }
-            
-            $return_clean['joins'] = $joins;
             
             $return_clean['aliases'] = $this->aliases;
             
@@ -115,6 +118,7 @@ Class Controller_Graph Extends Controller_Base
         print_r($return);
     }
 
+    private $idAndAlias = false;
     /**
      * Zwraca zapytanie zlozone z tablic
      */
@@ -123,12 +127,23 @@ Class Controller_Graph Extends Controller_Base
         if (false !== $this->noConstructorNoFun())
         {
             $this->sqlToArray();
-
+            
+            $this->parsedQuery['join'] = array();
+            
             if ( !empty($_POST['joins']))
             {
-                $this->parsedQuery['join'] = $_POST['joins'];
+                foreach ($_POST['joins'] as $k => $v)
+                {
+                    if ('undefined' != $v)
+                    {
+                        $this->parsedQuery['join'][$k] = $v;
+                    }
+                    else
+                    {
+                        $this->idAndAlias = $_POST['idAndAlias'];
+                    }
+                }
             }
-
             $this->patchQueryArray();
            
             $return = $this->reparsedSelect . $this->reparsedFrom . $this->reparsedJoin . $this->reparsedWhere;
@@ -217,7 +232,7 @@ Class Controller_Graph Extends Controller_Base
 //            }
 
             $this->reparsedJoin .= "\n" . strtoupper($v['type']) . " JOIN ";
-            $this->reparsedJoin .= "\n\t" . (is_array($v['to']['name']) ? $v['to']['name'][0] : $v['to']['name']) . " " . $this->aliases[(is_array($v['to']['name']) ? $v['to']['name'][0] : $v['to']['name'])] . "\n";
+            $this->reparsedJoin .= "\n\t" . (is_array($v['to']['name']) ? $v['to']['name'][0] : $v['to']['name']) . " " . $v['to']['alias'] . "\n";
             $this->reparsedJoin .= "ON";
             foreach ($v['on'] as $vv)
             {       
@@ -570,6 +585,10 @@ Class Controller_Graph Extends Controller_Base
     private function countLevels($parent, $level = 0)
     {
         //wszystkie joiny w zapytaniu
+        if (empty($this->parsedQuery['join']))
+        {
+            return false;
+        }
         foreach($this->parsedQuery['join'] as $table => $join_array)
         {
             //warunki dla joina (on + and)
@@ -581,23 +600,26 @@ Class Controller_Graph Extends Controller_Base
                     // jezeli ktorys z joinow odpowiada parentowi
                     if( is_int($k) and $parent == $v['from'])
                     {
-                        if ( !isset($cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]))
+                        if ($this->idAndAlias[1] != $v['alias'])
                         {
-                            $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])] = array(
-                                'column' => 1 == $k ? $varr[0]['column'] : $varr[1]['column'],
-                                'from' => 1 == $k ? $varr[0]['from'] : $varr[1]['from'],
-                                'alias' => 1 == $k ? $varr[0]['alias'] : $varr[1]['alias'],
-                                'level' => $level+1,
-                            );
+                            if ( !isset($cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]))
+                            {
+                                $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])] = array(
+                                    'column' => 1 == $k ? $varr[0]['column'] : $varr[1]['column'],
+                                    'from' => 1 == $k ? $varr[0]['from'] : $varr[1]['from'],
+                                    'alias' => 1 == $k ? $varr[0]['alias'] : $varr[1]['alias'],
+                                    'level' => $level+1,
+                                );
+                            }
+                            // jezeli istnieje juz taki element to dodajemy do tablicy joina
+                            $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]['join'][] = array(
+                                    'join_name' => 1 == $k ? $varr[1]['from'] : $varr[0]['from'],
+                                    'join_column' => 1 == $k ? $varr[1]['column'] : $varr[0]['column'],
+                                    'join_alias' => 1 == $k ? $varr[1]['alias'] : $varr[0]['alias']
+                                );
+
+                            $nextOnesToBeParent[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])][] = $table;
                         }
-                        // jezeli istnieje juz taki element to dodajemy do tablicy joina
-                        $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]['join'][] = array(
-                                'join_name' => 1 == $k ? $varr[1]['from'] : $varr[0]['from'],
-                                'join_column' => 1 == $k ? $varr[1]['column'] : $varr[0]['column'],
-                                'join_alias' => 1 == $k ? $varr[1]['alias'] : $varr[0]['alias']
-                            );
-                        
-                        $nextOnesToBeParent[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])][] = $table;
                     }
                 }
             }
