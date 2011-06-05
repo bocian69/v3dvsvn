@@ -190,6 +190,12 @@ t.idKsiazka = k.id
 <div id="pickJoinOn" style="display:none;width:300px;height:300px">
 </div>
 
+<div id="joinInfo" class="joinInfo" style="display:none;width:300px;height:300px">
+    <div class="joinInfo" style="width:300px" >
+        diff info etc
+    </div>
+</div>
+
 {literal}
 <script type="text/javascript">
 $(document).ready(function(){
@@ -286,6 +292,7 @@ init : function()
 
     for (var first in this.cords)
     {
+        this.aliasesUsed[this.cords[first].alias] = true;
         this.draw(this.cords[first]);
     }
     this.binds();
@@ -294,10 +301,14 @@ init : function()
 tableIdPrefix : 'JS__V3DV__table__',
 joinIdPrefix : 'JS__V3DV__join__',
 
+elementsData : new Object(),
+
 draw : function(cords)
 {
     var svg = this.svg;
 
+    this.aliasesUsed[cords.alias] = true;
+    
     if ( 0 != cords.level)
     {
         var path = svg.createPath();
@@ -309,7 +320,7 @@ draw : function(cords)
                 .arc(cords.coords.rM, cords.coords.rM, 0,0,0, cords.coords.start.xM, cords.coords.start.yM)
                 .line(cords.coords.start.xS, cords.coords.start.yS)
                 .close(),
-            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from}
+            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
             );
         var path = svg.createPath();
         svg.path(
@@ -320,15 +331,20 @@ draw : function(cords)
                 .arc(cords.coords.rL, cords.coords.rL, 0,0,0, cords.coords.start.xL, cords.coords.start.yL)
                 .line(cords.coords.start.xM, cords.coords.start.yM)
                 .close(),
-            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from}
+            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
             );
+                
+        this.elementsData[this.joinIdPrefix + cords.from + "___" + cords.alias] = cords;
+        this.elementsData[this.joinIdPrefix + cords.from + "___" + cords.alias].referingTo = this.tableIdPrefix + cords.from + "___" + cords.alias;
+            
+        this.elementsData[this.tableIdPrefix + cords.from + "___" + cords.alias] = cords;
+        this.elementsData[this.tableIdPrefix + cords.from + "___" + cords.alias].referingTo = this.joinIdPrefix + cords.from + "___" + cords.alias;
     }
     for (var kk in cords.children)
     {
         this.draw(cords.children[kk]);
     }
 },
-
 
 binds : function()
 {
@@ -375,7 +391,7 @@ binds : function()
 
     $('.JSgraphElement', this.svg.root());
     
-	$('.JSfancy').fancybox(
+	$('.JSgraphTable').fancybox(
     {
         'content' : $('#pickJoinOn').html(),
         'type' : 'ajax',
@@ -414,6 +430,11 @@ binds : function()
             V3Graph.constraintOfTable2SelectedToPickConstraint = false;  
             V3Graph.junctionOfTablesSelectedToPickConstraint = false;  
         }
+    });
+    
+    $('.JSgraphJoin').fancybox(
+    {
+        'content' : $('#joinInfo').html()
     });
 },
 
@@ -460,6 +481,35 @@ constraintOfTable2SelectedToPickConstraint : false,
 
 junctionOfTablesSelectedToPickConstraint : false,
 
+aliasesUsed : new Object(),
+setAliasUsed : function(aliasToCheck, addition)
+{
+    var textToAdd = '';
+    var aliasToSet = '';
+    
+    if ('undefined' == typeof addition)
+    {
+        textToAdd = '';
+        addition = 0;
+    }
+    else
+    {
+        textToAdd = '_' + addition;
+    }
+
+    if ('undefined' == typeof this.aliasesUsed[aliasToCheck + textToAdd])
+    {
+        this.aliasesUsed[aliasToCheck + textToAdd] = true;
+        return aliasToCheck + textToAdd;    
+    }
+    else
+    {
+        var aliasToSet = this.setAliasUsed( aliasToCheck, addition + 1);
+    }
+    
+    return aliasToSet;
+},
+
 extendJoin : function()
 {
     if (false === this.table1SelectedToPickConstraint || false === this.table2SelectedToPickConstraint)
@@ -472,21 +522,27 @@ extendJoin : function()
         this.getJoins();
     }
 
-    for (var k in this.joins);
-    
+    for (var k in this.joins)
+    {
+        this.aliasesUsed[this.joins[k].to.alias] = true;
+    }
+    var alias1 = this.table1SelectedToPickConstraint[1];
+
+    var alias2 = this.setAliasUsed( this.aliases[this.table2SelectedToPickConstraint[0]]);
+
     this.joins[parseInt(k)+1] =
     {
-        from : this.table1SelectedToPickConstraint,
+        from : this.table1SelectedToPickConstraint[0],
+        to : { name :  this.table2SelectedToPickConstraint[0],  alias : alias2 },
         on :
         {
             0 :
             {
-                0 : { from : this.table1SelectedToPickConstraint, alias : this.aliases[this.table1SelectedToPickConstraint], column : this.constraintOfTable1SelectedToPickConstraint},
-                1 : { from : this.table2SelectedToPickConstraint, alias : this.aliases[this.table2SelectedToPickConstraint], column : this.constraintOfTable2SelectedToPickConstraint},
+                0 : { from : this.table1SelectedToPickConstraint[0], alias : alias1, column : this.constraintOfTable1SelectedToPickConstraint},
+                1 : { from : this.table2SelectedToPickConstraint[0], alias : alias2, column : this.constraintOfTable2SelectedToPickConstraint},
                 junction: this.junctionOfTablesSelectedToPickConstraint
             }
         },
-        to : { name :  this.table2SelectedToPickConstraint,  alias : this.aliases[this.table2SelectedToPickConstraint] },
         type : 'inner'
     };
 
@@ -555,6 +611,13 @@ markConstraintChoises : function(invoker)
 {
     event.preventDefault();
     console.log(invoker);
+},
+
+removeTableFromGraph : function(invokers_id)
+{
+    event.preventDefault();
+    
+    alert('remove action geos here PAMIETEJ ABY DOROBIC: obluge jednego okregu i obluge pierwszego elementu RED CIRCLE');
 }
 }
 

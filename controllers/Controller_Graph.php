@@ -217,7 +217,7 @@ Class Controller_Graph Extends Controller_Base
 //            }
 
             $this->reparsedJoin .= "\n" . strtoupper($v['type']) . " JOIN ";
-            $this->reparsedJoin .= "\n\t" . $v['to']['name'] . " " . $this->aliases[$v['to']['name']] . "\n";
+            $this->reparsedJoin .= "\n\t" . (is_array($v['to']['name']) ? $v['to']['name'][0] : $v['to']['name']) . " " . $this->aliases[(is_array($v['to']['name']) ? $v['to']['name'][0] : $v['to']['name'])] . "\n";
             $this->reparsedJoin .= "ON";
             foreach ($v['on'] as $vv)
             {       
@@ -553,11 +553,11 @@ Class Controller_Graph Extends Controller_Base
     public function countCords ()
     {
         $this->coords[$this->parsedQuery['from']['name']]['level'] = 0;
+        $this->coords[$this->parsedQuery['from']['name']]['alias'] = $this->parsedQuery['from']['alias'];
         $this->coords[$this->parsedQuery['from']['name']]['children'] = $this->countLevels($this->parsedQuery['from']['name']);
 
         $this->coordsCounted = $this->coords;
         $this->countMetrics($this->coords, $this->coordsCounted);
-        
     }
 
     /**
@@ -586,13 +586,15 @@ Class Controller_Graph Extends Controller_Base
                             $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])] = array(
                                 'column' => 1 == $k ? $varr[0]['column'] : $varr[1]['column'],
                                 'from' => 1 == $k ? $varr[0]['from'] : $varr[1]['from'],
+                                'alias' => 1 == $k ? $varr[0]['alias'] : $varr[1]['alias'],
                                 'level' => $level+1,
                             );
                         }
                         // jezeli istnieje juz taki element to dodajemy do tablicy joina
                         $cords[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])]['join'][] = array(
                                 'join_name' => 1 == $k ? $varr[1]['from'] : $varr[0]['from'],
-                                'join_column' => 1 == $k ? $varr[1]['column'] : $varr[0]['column']
+                                'join_column' => 1 == $k ? $varr[1]['column'] : $varr[0]['column'],
+                                'join_alias' => 1 == $k ? $varr[1]['alias'] : $varr[0]['alias']
                             );
                         
                         $nextOnesToBeParent[(1 == $k ? $varr[0]['from'] : $varr[1]['from'])][] = $table;

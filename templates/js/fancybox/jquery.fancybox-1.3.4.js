@@ -792,69 +792,143 @@
 
 		$(this)
 			.data('fancybox', $.extend({}, options, ($.metadata ? $(this).metadata() : {})))
-//			.unbind('click.fb')
-			.bind('mouseup.fb', function(e) {
+			.bind('click.fb', function(e)
+            {
 				e.preventDefault();
-                
-                //element na ktory upuszczamy
-                if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp'))
-                {
-                    if (false === V3Graph.draggedNow)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        V3Graph.table1SelectedToPickConstraint = $(this).attr('id').split(V3Graph.tableIdPrefix).join('');
-                    }
-                }
-                
                 if (0 < $(this).attr('class').baseVal.indexOf('JSgraphJoin'))
                 {
-                    if (false !== V3Graph.draggedNow)
-                    {
+                    if (busy) {
                         return;
                     }
-                    else
-                    {
-                        V3Graph.table1SelectedToPickConstraint = $(this).attr('id').split(V3Graph.joinIdPrefix).join('');
+
+                    busy = true;
+
+                    $(this).blur();
+
+                    selectedArray = [];
+                    selectedIndex = 0;
+
+                    var rel = $(this).attr('rel') || '';
+
+                    if (!rel || rel == '' || rel === 'nofollow') {
+                        selectedArray.push(this);
+
+                    } else {
+                        selectedArray = $("a[rel=" + rel + "], area[rel=" + rel + "]");
+                        selectedIndex = selectedArray.index( this );
                     }
-                }
-                
-                //element upuszczany
-                V3Graph.table2SelectedToPickConstraint = V3Graph.draggedNow.attr('id');
-                //nadpisanie data 
-                $(this).data('fancybox').ajax.data = 
-                {
-                    action: 'getTablesColumns',
-                    table1: V3Graph.table1SelectedToPickConstraint,
-                    table2: V3Graph.table2SelectedToPickConstraint
-                };
+
+                    _start();
                     
-				if (busy) {
-					return;
-				}
+                    var elemInfo = V3Graph.elementsData[$(this).attr('id')]
+                    var contentToAdd = '';
+                    contentToAdd = '<div style="300px">' + 
+                                    '<center><b>---------------------- join info ----------------------</b></center><br / >'+
+                                    '<div style="width:49%;float:left">' +
+                                        '<b>from</b>: <br />' + 
+                                        elemInfo.join[0].join_name + 
+                                        '<br />' + 
+                                        '<b>alias</b>: <br />' +
+                                        elemInfo.join[0].join_alias +
+                                        '<br />' +
+                                        '<b>column</b>: <br />' +
+                                        elemInfo.join[0].join_column + 
+                                        
+                                    '</div>'+
+                                    '<div style="width:49%;float:right">' +
+                                        '<b>to</b>: <br />' + 
+                                        elemInfo.from + 
+                                        '<br />' +
+                                        '<b>alias</b>: <br />' +
+                                        elemInfo.alias +
+                                        '<br />' +
+                                        '<b>column</b>: <br />' +
+                                        elemInfo.column + 
+                                    '</div>'+
+                                    '<div style="clear:both">'+
+                                        '<br />' +
+                                        '<a href="#" onclick="V3Graph.removeTableFromGraph(\'' + $(this).attr('id') + '\')">remove join</a>'+
+                                    '</div>' +
+                                   '</div>';
+                    $('.joinInfo').html(contentToAdd);
+                    return;
+                }
+            })
+			.bind('mouseup.fb', function(e) 
+            {
+				e.preventDefault();
+                if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTable'))
+                {
+                    var temp = '';
+                    //element na ktory upuszczamy
+                    if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp'))
+                    {
+                        if (false === V3Graph.draggedNow)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            temp = $(this).attr('id').split(V3Graph.tableIdPrefix).join('');
+                            V3Graph.table1SelectedToPickConstraint = temp.split('___');
+                            temp = '';
+                        }
+                    }
 
-				busy = true;
+                    if (0 < $(this).attr('class').baseVal.indexOf('JSgraphJoin'))
+                    {
+                        if (false !== V3Graph.draggedNow)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            
+//                            temp = $(this).attr('id').split(V3Graph.joinIdPrefix).join('');
+//                            V3Graph.table1SelectedToPickConstraint = temp.split('___');
+//                            temp = '';
 
-				$(this).blur();
+//                            console.log(V3Graph.elementsData[$(this).attr('id')]);  
+                        }
+                    }
 
-				selectedArray = [];
-				selectedIndex = 0;
+                    //element upuszczany
+                    V3Graph.table2SelectedToPickConstraint = { 0 : V3Graph.draggedNow.attr('id')};
+                    
+                    //nadpisanie data 
+                    $(this).data('fancybox').ajax.data = 
+                    {
+                        action: 'getTablesColumns',
+                        table1: V3Graph.table1SelectedToPickConstraint[0],
+                        table2: V3Graph.table2SelectedToPickConstraint[0]
+                    };
+                
+                    //standarwone akcje
+                    if (busy) {
+                        return;
+                    }
 
-				var rel = $(this).attr('rel') || '';
+                    busy = true;
 
-				if (!rel || rel == '' || rel === 'nofollow') {
-					selectedArray.push(this);
+                    $(this).blur();
 
-				} else {
-					selectedArray = $("a[rel=" + rel + "], area[rel=" + rel + "]");
-					selectedIndex = selectedArray.index( this );
-				}
+                    selectedArray = [];
+                    selectedIndex = 0;
 
-				_start();
+                    var rel = $(this).attr('rel') || '';
 
-				return;
+                    if (!rel || rel == '' || rel === 'nofollow') {
+                        selectedArray.push(this);
+
+                    } else {
+                        selectedArray = $("a[rel=" + rel + "], area[rel=" + rel + "]");
+                        selectedIndex = selectedArray.index( this );
+                    }
+
+                    _start();
+
+                    return;
+                }
 			});
 
 		return this;
