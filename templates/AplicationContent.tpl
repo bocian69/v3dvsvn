@@ -37,145 +37,20 @@
         -->
 </div>
 
-<div id="additionInfo" style="height:920px">
-	<div id="tableInfo">
+<div id="additionInfo" style="height:600px">
+	<div id="tableInfo" style="height:50%">
 		<div id="tableInfoHeader">Informacje o tabeli:</div>
 		<div id="tableInfoContent"></div>
 	</div>
-	<div id="sqlArea" style="height:900px">
+	<div id="sqlArea" style="height:580px">
 		<div id="sqlAreaHeader">
 		Zapytanie SQL:
 		</div>
-		<div id="sqlAreaContent" style="height:820px">
-<!--            <textarea id="sqlQuery" style="height:800px">
-SELECT
-*
-FROM
-    table t
-
-left JOIN
-    aaa a
-ON
-    a.aield = t.tield1
-AND
-    a.field2 = t.tield3
-
-right JOIN
-    pable b
-ON
-    b.bield = t.tield1
-AND
-    b.bield2 = t.tield3
-
-JOIN
-    pable p
-ON
-    p.pield = b.tield1
-AND
-    p.pield2 = b.tield3
-</textarea>
--->
-<!-- 
-
-SELECT
-*
-FROM
-    table table
-
-left JOIN
-    aaa aaa
-ON
-    aaa.field2 = table.tield3
-
-left JOIN
-    aaa aaa
-ON
-    aaa.aield = table.tield1
-
-right JOIN
-    pable pable
-ON
-    pable.bield2 = table.tield3
-
-right JOIN
-    third third
-ON
-    third.bield = aaa.tield1
-
--->
-
-<!--     
-SELECT
-    t.tield1, t.tield2, t.tield3, t.tield4,
-    p.pield,
-    f.field4
-FROM
-    table t
-
-left JOIN
-    fable f
-ON
-    f.field = t.tield1
-AND
-    f.field2 = t.tield3
-right JOIN
-    pable p
-ON
-    p.pield = t.tield1
-AND
-    p.pield2 = t.tield3
-
-JOIN
-    iable i
-ON
-    i.iield = p.pield1
-AND
-    i.iield2 = p.pield3
-
-JOIN
-    zable z
-ON
-    z.zield = p.pield1
-AND
-    z.zield2 = p.pield3
-
-JOIN
-    xable x
-ON
-    x.xield = p.pield1
-AND
-    x.xield2 = p.pield3
-
-JOIN
-    fffable fff
-ON
-    fff.fffield = f.field1
-AND
-    fff.fffield2 = f.field3
-
-WHERE
-    field3='val1'
-AND
-    field4=5
-OR
-    field5='val2'
--->
-<!--SELECT
-* 
-FROM
-ksiazki k 
-JOIN 
-kategorie k1
-ON
-k.idKategoria = k1.id
-JOIN
-tagbook_join t
-ON
-t.idKsiazka = k.id-->
-<textarea id="sqlQuery" style="height:800px">
+		<div id="sqlAreaContent" style="height:520px">
+<textarea id="sqlQuery" style="height:500px">
 
 </textarea>
-
+<input type="button" id="sqlQueryButton" value="generuj graf" />
         </div>
 	</div>
 </div>
@@ -260,6 +135,9 @@ $(document).ready(function()
     V3Graph.init();
 });
 
+$('#sqlQueryButton').click(function(){
+	V3Graph.init();
+});
 
 var V3Graph =
 {
@@ -279,16 +157,14 @@ cords : new Object(),
 cS : new Object(),
 levelsPortions : new Object(),
 joins : new Array(),
-noNeedToBindDiagramArea : false,
 
 drawCircle : function()
 {
     $("#diagramArea").droppable( 'disable' );
 
-    this.noNeedToBindDiagramArea = true;
     this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'gray', strokeWidth: 1, id: this.tableIdPrefix + this.draggedNow.attr('id') + "___" + this.draggedNow.attr('id').substr(0, 1), class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
     
-    $('#sqlQuery').text('SELECT * FROM ' + this.draggedNow.attr('id') + ' ' + this.draggedNow.attr('id').substr(0, 1) + ' ');
+    $('#sqlQuery').val('SELECT * FROM ' + this.draggedNow.attr('id') + ' ' + this.draggedNow.attr('id').substr(0, 1) + ' ');
     
     this.binds();
 },
@@ -298,18 +174,15 @@ init : function()
     $('#diagramArea').svg();
     this.svg = $('#diagramArea').svg('get');
     this.svg.clear();
-    if (this.noNeedToBindDiagramArea == false)
-    {
-        $("#diagramArea").droppable({
-            activeClass: "ui-state-default",
-            hoverClass: "ui-state-hover",
-            accept: ":not(.ui-sortable-helper)",
-            drop: function( event, ui ) 
-            {
-                V3Graph.drawCircle();
-            }
-        });
-    }
+    $("#diagramArea").droppable({
+        activeClass: "ui-state-default",
+        hoverClass: "ui-state-hover",
+        accept: ":not(.ui-sortable-helper)",
+        drop: function( event, ui ) 
+        {
+            V3Graph.drawCircle();
+        }
+    });
     
     this.getCoords();
     this.getJoins();
@@ -345,27 +218,64 @@ draw : function(cords)
     if ( 0 != cords.level)
     {
         var path = svg.createPath();
-        svg.path(
-            path
-                .move(cords.coords.start.xS, cords.coords.start.yS)
-                .arc(cords.coords.rS, cords.coords.rS, 0,0,1, cords.coords.end.xS, cords.coords.end.yS)
-                .line(cords.coords.end.xM, cords.coords.end.yM)
-                .arc(cords.coords.rM, cords.coords.rM, 0,0,0, cords.coords.start.xM, cords.coords.start.yM)
-                .line(cords.coords.start.xS, cords.coords.start.yS)
-                .close(),
-            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
-            );
+        if ('undefined' == typeof cords.coords.start_extend)
+        {
+            svg.path(
+                path
+                    .move(cords.coords.start.xS, cords.coords.start.yS)
+                    .arc(cords.coords.rS, cords.coords.rS, 0,0,1, cords.coords.end.xS, cords.coords.end.yS)
+                    .line(cords.coords.end.xM, cords.coords.end.yM)
+                    .arc(cords.coords.rM, cords.coords.rM, 0,0,0, cords.coords.start.xM, cords.coords.start.yM)
+                    .line(cords.coords.start.xS, cords.coords.start.yS)
+                    .close(),
+                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
+                );
+        }
+        else
+        {
+            svg.path(
+                path
+                    .move(cords.coords.start.xS, cords.coords.start.yS)
+                    .arc(cords.coords.rS, cords.coords.rS, 0,0,0, cords.coords.end.xS, cords.coords.end.yS)
+                    .arc(cords.coords.rS, cords.coords.rS, 0,0,0, cords.coords.end_extend.xS, cords.coords.end_extend.yS)
+                    .line(cords.coords.end_extend.xM, cords.coords.end_extend.yM)
+                    .arc(cords.coords.rM, cords.coords.rM, 0,0,1, cords.coords.start_extend.xM, cords.coords.start_extend.yM)
+                    .arc(cords.coords.rM, cords.coords.rM, 0,0,1, cords.coords.start.xM, cords.coords.start.yM)
+                    .line(cords.coords.start.xS, cords.coords.start.yS)
+                    .close(),
+                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
+                );
+        }
+        
         var path = svg.createPath();
-        svg.path(
-            path
-                .move(cords.coords.start.xM, cords.coords.start.yM)
-                .arc(cords.coords.rM,cords.coords.rM, 0,0,1, cords.coords.end.xM, cords.coords.end.yM)
-                .line(cords.coords.end.xL, cords.coords.end.yL)
-                .arc(cords.coords.rL, cords.coords.rL, 0,0,0, cords.coords.start.xL, cords.coords.start.yL)
-                .line(cords.coords.start.xM, cords.coords.start.yM)
-                .close(),
-            {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
-            );
+        if ('undefined' == typeof cords.coords.start_extend)
+        {
+            svg.path(
+                path
+                    .move(cords.coords.start.xM, cords.coords.start.yM)
+                    .arc(cords.coords.rM,cords.coords.rM, 0,0,1, cords.coords.end.xM, cords.coords.end.yM)
+                    .line(cords.coords.end.xL, cords.coords.end.yL)
+                    .arc(cords.coords.rL, cords.coords.rL, 0,0,0, cords.coords.start.xL, cords.coords.start.yL)
+                    .line(cords.coords.start.xM, cords.coords.start.yM)
+                    .close(),
+                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
+                );
+        }
+        else
+        {
+            svg.path(
+                path
+                    .move(cords.coords.start.xM, cords.coords.start.yM)
+                    .arc(cords.coords.rM,cords.coords.rM, 0,0,0, cords.coords.end.xM, cords.coords.end.yM)
+                    .arc(cords.coords.rM,cords.coords.rM, 0,0,0, cords.coords.end_extend.xM, cords.coords.end_extend.yM)
+                    .line(cords.coords.end_extend.xL, cords.coords.end_extend.yL)
+                    .arc(cords.coords.rL, cords.coords.rL, 0,0,1, cords.coords.start_extend.xL, cords.coords.start_extend.yL)
+                    .arc(cords.coords.rL, cords.coords.rL, 0,0,1, cords.coords.start.xL, cords.coords.start.yL)
+                    .line(cords.coords.start.xM, cords.coords.start.yM)
+                    .close(),
+                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
+                );
+        }
                 
         this.elementsData[this.joinIdPrefix + cords.from + "___" + cords.alias] = cords;
         this.elementsData[this.joinIdPrefix + cords.from + "___" + cords.alias].referingTo = this.tableIdPrefix + cords.from + "___" + cords.alias;
@@ -655,7 +565,6 @@ idAndAlias : false,
 
 removeTableFromGraph : function(invokersId)
 {
-    event.preventDefault();
         
     if ('undefined' == typeof this.joins)
     {

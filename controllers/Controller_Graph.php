@@ -693,33 +693,75 @@ Class Controller_Graph Extends Controller_Base
      * @param <int> $level
      * @return <array>
      */
-    private function cartesian($angle_single, $angle_start = 0, $angle_end = 360, $level)
+	private function cartesian($angle_single, $angle_start = 0, $angle_end = 360, $level)
     {
+
         $cords = array();
         
         $cords['rS'] = ($this->rGap * ($level)) + ($this->rCircleS * ($level-1)) + ($this->rCircleL * ($level));
         $cords['rM'] = ($this->rGap * ($level)) + ($this->rCircleS * ($level)) + ($this->rCircleL * ($level));
         $cords['rL'] = ($this->rGap * ($level)) + ($this->rCircleS * ($level)) + ($this->rCircleL * ($level+1));
+        if ($angle_start == 0 and $angle_end == 360)
+        {
+            $cords['start'] = array
+            (
+                'xS' => $cords['rS'] * cos(deg2rad($angle_start)) + $this->stMx,
+                'yS' => $cords['rS'] * sin(deg2rad($angle_start)) + $this->stMy,
+                'xM' => $cords['rM'] * cos(deg2rad($angle_start)) + $this->stMx,
+                'yM' => $cords['rM'] * sin(deg2rad($angle_start)) + $this->stMy,
+                'xL' => $cords['rL'] * cos(deg2rad($angle_start)) + $this->stMx,
+                'yL' => $cords['rL'] * sin(deg2rad($angle_start)) + $this->stMy
+            );
+            $cords['start_extend'] = array
+            (
+                'xS' => $cords['rS'] * cos(deg2rad($angle_end/2)) + $this->stMx,
+                'yS' => $cords['rS'] * sin(deg2rad($angle_end/2)) + $this->stMy,
+                'xM' => $cords['rM'] * cos(deg2rad($angle_end/2)) + $this->stMx,
+                'yM' => $cords['rM'] * sin(deg2rad($angle_end/2)) + $this->stMy,
+                'xL' => $cords['rL'] * cos(deg2rad($angle_end/2)) + $this->stMx,
+                'yL' => $cords['rL'] * sin(deg2rad($angle_end/2)) + $this->stMy
+            );
+            $cords['end'] = array
+            (
+                'xS' => $cords['rS'] * cos(deg2rad($angle_end/2)) + $this->stMx,
+                'yS' => $cords['rS'] * sin(deg2rad($angle_end/2)) + $this->stMy,
+                'xM' => $cords['rM'] * cos(deg2rad($angle_end/2)) + $this->stMx,
+                'yM' => $cords['rM'] * sin(deg2rad($angle_end/2)) + $this->stMy,
+                'xL' => $cords['rL'] * cos(deg2rad($angle_end/2)) + $this->stMx,
+                'yL' => $cords['rL'] * sin(deg2rad($angle_end/2)) + $this->stMy
+            );
+            $cords['end_extend'] = array
+            (
+                'xS' => $cords['rS'] * cos(deg2rad($angle_end)) + $this->stMx,
+                'yS' => $cords['rS'] * sin(deg2rad($angle_end)) + $this->stMy,
+                'xM' => $cords['rM'] * cos(deg2rad($angle_end)) + $this->stMx,
+                'yM' => $cords['rM'] * sin(deg2rad($angle_end)) + $this->stMy,
+                'xL' => $cords['rL'] * cos(deg2rad($angle_end)) + $this->stMx,
+                'yL' => $cords['rL'] * sin(deg2rad($angle_end)) + $this->stMy
+            );
+        }
+        else
+        {
+            $cords['start'] = array
+            (
+                'xS' => $cords['rS'] * cos(deg2rad($angle_start)) + $this->stMx,
+                'yS' => $cords['rS'] * sin(deg2rad($angle_start)) + $this->stMy,
+                'xM' => $cords['rM'] * cos(deg2rad($angle_start)) + $this->stMx,
+                'yM' => $cords['rM'] * sin(deg2rad($angle_start)) + $this->stMy,
+                'xL' => $cords['rL'] * cos(deg2rad($angle_start)) + $this->stMx,
+                'yL' => $cords['rL'] * sin(deg2rad($angle_start)) + $this->stMy
+            );
+            $cords['end'] = array
+            (
+                'xS' => $cords['rS'] * cos(deg2rad($angle_end)) + $this->stMx,
+                'yS' => $cords['rS'] * sin(deg2rad($angle_end)) + $this->stMy,
+                'xM' => $cords['rM'] * cos(deg2rad($angle_end)) + $this->stMx,
+                'yM' => $cords['rM'] * sin(deg2rad($angle_end)) + $this->stMy,
+                'xL' => $cords['rL'] * cos(deg2rad($angle_end)) + $this->stMx,
+                'yL' => $cords['rL'] * sin(deg2rad($angle_end)) + $this->stMy
+            );
 
-        $cords['start'] = array
-        (
-            'xS' => $cords['rS'] * cos(deg2rad($angle_start)) + $this->stMx,
-            'yS' => $cords['rS'] * sin(deg2rad($angle_start)) + $this->stMy,
-            'xM' => $cords['rM'] * cos(deg2rad($angle_start)) + $this->stMx,
-            'yM' => $cords['rM'] * sin(deg2rad($angle_start)) + $this->stMy,
-            'xL' => $cords['rL'] * cos(deg2rad($angle_start)) + $this->stMx,
-            'yL' => $cords['rL'] * sin(deg2rad($angle_start)) + $this->stMy
-        );
-        $cords['end'] = array
-        (
-            'xS' => $cords['rS'] * cos(deg2rad($angle_end)) + $this->stMx,
-            'yS' => $cords['rS'] * sin(deg2rad($angle_end)) + $this->stMy,
-            'xM' => $cords['rM'] * cos(deg2rad($angle_end)) + $this->stMx,
-            'yM' => $cords['rM'] * sin(deg2rad($angle_end)) + $this->stMy,
-            'xL' => $cords['rL'] * cos(deg2rad($angle_end)) + $this->stMx,
-            'yL' => $cords['rL'] * sin(deg2rad($angle_end)) + $this->stMy
-        );
-
+        }
         return $cords;
     }
 }
