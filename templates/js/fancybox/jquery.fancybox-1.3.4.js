@@ -823,7 +823,7 @@
                     var elemInfo = V3Graph.elementsData[$(this).attr('id')]
                     var contentToAdd = '';
                     contentToAdd = '<div style="300px">' + 
-                                    '<center><b>---------------------- join info ----------------------</b></center><br / >'+
+                                    '<center><b>------------- Informacje o połączeniu -------------</b></center><br / >'+
                                     '<div style="width:49%;float:left">' +
                                         '<b>from</b>: <br />' + 
                                         elemInfo.join[0].join_name + 
@@ -847,10 +847,29 @@
                                     '</div>'+
                                     '<div style="clear:both">'+
                                         '<br />' +
-                                        '<a href="#" onclick="V3Graph.removeTableFromGraph(\'' + $(this).attr('id') + '\')">remove join</a>'+
+                                        '<a href="#" onclick="V3Graph.removeTableFromGraph(\'' + $(this).attr('id') + '\')">Usuń połączenie</a>'+
                                     '</div>' +
                                    '</div>';
                     $('.joinInfo').html(contentToAdd);
+                    return;
+                }
+            })
+            .bind('mouseout.fb', function(e) 
+            {
+            	if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp') && $(this).attr('tagName') != 'circle')
+                {
+            		$('#elementInformation').remove();
+                }
+            	
+            })
+            .bind('mouseover.fb', function(e) 
+            {
+            	if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp') && $(this).attr('tagName') != 'circle')
+                {
+                    var elemInfo = V3Graph.elementsData[$(this).attr('id')]
+                    $('<div id="elementInformation">'+elemInfo.from+' - '+elemInfo.column+'</div>')
+                    .css({position: 'absolute', minWidth: '50px', minHeight: '6px', fontSize: '12px', color: '#000', padding: '5px', margin: '5px', background: '#f0f0f0', border: '1px solid #000', top: 0, right: 0})
+                    .appendTo('#diagramArea');
                     return;
                 }
             })

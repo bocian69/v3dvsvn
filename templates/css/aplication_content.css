@@ -1,13 +1,13 @@
 #mainContent {
 	width: 890px;
 	height: 400px;
-	border: 1px solid green;
+	border: 2px solid #000;
 }
 
 #tables {
 	width: 200px;
 	height: 390px;
-	border: 1px solid red;
+	border: 1px solid gray;
 	margin: 5px;
 	float: left;
 	position: relative;
@@ -18,7 +18,7 @@
 	height: 390px;
 	margin: 5px;
 	margin-left: 0px;
-	border: 1px solid black;
+	border: 1px solid gray;
 	float: left;
 	position: relative;
 }
@@ -27,10 +27,10 @@
 	width: 160px;
 	margin: 5px auto;
 	padding: 5px;
-	border: 1px solid blue;
+	border: 1px solid #000;
 	text-align: center;
 	z-index: 1000;
-    background-color:white;
+    background-color: #f0f0f0;
 }
 
 .dnd {
@@ -41,7 +41,7 @@
 	width: 890px;
 	height: 200px;
 	margin-top: 5px;
-	border: 1px solid orange;
+	border: 2px solid #000;
 }
 
 #tableInfo {
@@ -51,14 +51,15 @@
 	float: left;
 	position: relative;
 	overflow: auto;
-	border: 1px solid red;
+	border: 1px solid gray;
 }
 
 #tableInfoHeader {
 	width: 160px;
 	margin: 5px auto;
 	padding: 5px;
-	border: 1px solid blue;
+	border: 1px solid gray;
+	background-color: #aaa;
 	text-align: center;
 }
 
@@ -66,7 +67,8 @@
 	width: 160px;
 	margin: 5px auto;
 	padding: 5px;
-	border: 1px solid blue;
+	border: 1px solid gray;
+	background-color: #f0f0f0;
 	line-height: 190%;
 }
 
@@ -75,7 +77,7 @@
 	height: 190px;
 	margin: 5px;
 	margin-left: 0px;
-	border: 1px solid black;
+	border: 1px solid gray;
 	float: left;
 }
 
@@ -83,15 +85,17 @@
 	width: 650px;
 	margin: 5px auto;
 	padding: 5px;
-	border: 1px solid blue;
+	border: 1px solid gray;
+	background-color: #aaa;
 	text-align: center;
+	height: 17px;
 }
 
 #sqlAreaContent {
 	width: 650px;
 	margin: 5px auto;
 	padding: 5px;
-	border: 1px solid blue;
+	border: 1px solid gray;
 }
 
 #sqlQuery {

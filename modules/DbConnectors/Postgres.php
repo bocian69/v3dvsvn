@@ -26,6 +26,23 @@ Class Postgres extends Db {
 		return $databases;
 	}
 	
+	function showColumns($table) {
+        $sql = sprintf($this->db->metaColumnsSQL, $table, $table);//"SHOW COLUMNS FROM " . addslashes($table);
+		$res = $this->db->Execute($sql);
+        foreach ($res as $r) 
+        {
+        	$typ = $r['typname'];
+        	if ($r['typname'] == 'varchar') {
+        		$typ = $r['typname'].' ('.($r['atttypmod']-4).')';
+        	}
+			$tables[] = array(
+                'field' => $r['attname'],
+                'type' => $typ
+            );
+		}
+        return $tables;
+	}
+	
 	function showRelations() {
 		$sql = 'SELECT tc.constraint_name,
 				tc.constraint_type,
@@ -67,6 +84,20 @@ Class Postgres extends Db {
 			
 		}
 		return $tables;
+	}
+	
+	function tableInfo($table) {
+		//"SHOW TABLE STATUS LIKE ?", array($table)
+		$res = $this->db->Execute($this->db->metaColumnsSQL);
+		$info = $res->FetchRow();
+		$newInfo = array('Typ' => $info['Engine'],
+						 'Kodowanie' => $info['Collation'],
+						 'Ilość rekordów' => $info['Rows'],
+						 'Data utworzenia' => $info['Create_time'],
+						 'Data ostatniej modyfikacji' => $info['Update_time'],
+						 'Następny numer' => empty($info['Auto_increment']) ? 1 : $info['Auto_increment']
+						);
+		return $newInfo;
 	}
 	
 }

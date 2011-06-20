@@ -37,24 +37,23 @@
         -->
 </div>
 
-<div id="additionInfo" style="height:600px">
-	<div id="tableInfo" style="height:50%">
+<div id="additionInfo">
+	<div id="tableInfo">
 		<div id="tableInfoHeader">Informacje o tabeli:</div>
 		<div id="tableInfoContent"></div>
 	</div>
-	<div id="sqlArea" style="height:580px">
+	<div id="sqlArea">
 		<div id="sqlAreaHeader">
-		Zapytanie SQL:
+		<div style="width: 85%; float: left;">Zapytanie SQL:</div><div style="width: 15%;float: left;">
+		<input type="button" id="sqlQueryButton" value="generuj graf" style="margin-top:-2px;" /></div>
 		</div>
-		<div id="sqlAreaContent" style="height:520px">
-<textarea id="sqlQuery" style="height:500px">
-
+		<div id="sqlAreaContent">
+<textarea id="sqlQuery">
 </textarea>
-<input type="button" id="sqlQueryButton" value="generuj graf" />
         </div>
 	</div>
 </div>
-
+<!-- 
 <div id="dataInfo">
 	<div id="dataInfoHeader">
 	Dane zapytania:
@@ -62,7 +61,7 @@
 	<div id="dataInfoContent">
 	</div>
 </div>
-
+-->
 <div id="pickJoinOn" style="display:none;width:300px;height:300px">
 </div>
 
@@ -162,7 +161,7 @@ drawCircle : function()
 {
     $("#diagramArea").droppable( 'disable' );
 
-    this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'gray', strokeWidth: 1, id: this.tableIdPrefix + this.draggedNow.attr('id') + "___" + this.draggedNow.attr('id').substr(0, 1), class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
+    this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: '#480000', strokeWidth: 1, id: this.tableIdPrefix + this.draggedNow.attr('id') + "___" + this.draggedNow.attr('id').substr(0, 1), class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
     
     $('#sqlQuery').val('SELECT * FROM ' + this.draggedNow.attr('id') + ' ' + this.draggedNow.attr('id').substr(0, 1) + ' ');
     
@@ -191,7 +190,7 @@ init : function()
     {
         if ('' != k)
         {
-            this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: 'gray', strokeWidth: 1, id: this.tableIdPrefix + k + "___" + this.cords[k].alias, class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
+            this.svg.circle(this.stMx, this.stMy, this.rCircleL, {fill: '#480000', strokeWidth: 1, id: this.tableIdPrefix + k + "___" + this.cords[k].alias, class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp'});
         }
     }
     
@@ -201,6 +200,7 @@ init : function()
         this.aliasesUsed[this.cords[first].alias] = true;
         this.draw(this.cords[first]);
     }
+    $("#diagramArea").css({opacity: '1'});
     this.binds();
 },
 
@@ -228,7 +228,7 @@ draw : function(cords)
                     .arc(cords.coords.rM, cords.coords.rM, 0,0,0, cords.coords.start.xM, cords.coords.start.yM)
                     .line(cords.coords.start.xS, cords.coords.start.yS)
                     .close(),
-                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
+                {strokeWidth: 2, stroke: "white", fill: '#480000', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
                 );
         }
         else
@@ -243,7 +243,7 @@ draw : function(cords)
                     .arc(cords.coords.rM, cords.coords.rM, 0,0,1, cords.coords.start.xM, cords.coords.start.yM)
                     .line(cords.coords.start.xS, cords.coords.start.yS)
                     .close(),
-                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
+                {strokeWidth: 2, stroke: "white", fill: '#480000', class: 'JSfancy JSgraphElement JSgraphJoin', id: this.joinIdPrefix + cords.from + "___" + cords.alias}
                 );
         }
         
@@ -258,7 +258,7 @@ draw : function(cords)
                     .arc(cords.coords.rL, cords.coords.rL, 0,0,0, cords.coords.start.xL, cords.coords.start.yL)
                     .line(cords.coords.start.xM, cords.coords.start.yM)
                     .close(),
-                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
+                {strokeWidth: 2, stroke: "white", fill: '#480000', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
                 );
         }
         else
@@ -273,7 +273,7 @@ draw : function(cords)
                     .arc(cords.coords.rL, cords.coords.rL, 0,0,1, cords.coords.start.xL, cords.coords.start.yL)
                     .line(cords.coords.start.xM, cords.coords.start.yM)
                     .close(),
-                {strokeWidth: 2, stroke: "white", fill: '#aaa', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
+                {strokeWidth: 2, stroke: "white", fill: '#480000', class: 'JSfancy JSgraphElement JSgraphTable JSgraphTableDropp', id: this.tableIdPrefix + cords.from + "___" + cords.alias}
                 );
         }
                 
@@ -401,7 +401,7 @@ svgOver : function()
 {
     if (0 < $(this).attr('class').baseVal.indexOf('JSgraphTableDropp') && false !== V3Graph.draggedNow)
     {
-        $(this).attr({'opacity': '0.7',fill: '#000'});
+        $(this).attr({'opacity': '0.7',fill: '#480000'});
     }
     else if (false === V3Graph.draggedNow)
     {
@@ -411,7 +411,7 @@ svgOver : function()
 
 svgOut : function()
 {
-    $(this).attr({'opacity': '1',fill: '#aaa'});
+    $(this).attr({'opacity': '1',fill: '#480000'});
 },
 
 
@@ -510,7 +510,6 @@ getQuery : function()
 markConstraintChoises : function(invoker)
 {
     event.preventDefault();
-    console.log(invoker);
 },
 
 extendJoin : function()

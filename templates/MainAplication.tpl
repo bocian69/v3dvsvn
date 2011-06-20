@@ -66,7 +66,7 @@ $(document).ready(
 			<div id="window_top">
 				<div id="wt_left">
 					<div id="wt_right">
-						<p id="breadcrumb" style="text-align: center;"><strong>Visiual Drag & Drop Database Viewer v 1.0</strong></p>
+						<p id="breadcrumb" style="text-align: center;"><strong>Visiual Drag & Drop Database Viewer v 1.0 Beta</strong></p>
 						<img src="{$img_path}window_top_right.png" id="tm_r" alt="V3DV" title="V3DV" />
 					</div>
 				</div>
@@ -86,7 +86,7 @@ $(document).ready(
 									</div>
 
 									<div class="special_cols">
-										<div class="right">
+										<div class="right" style="background-color: #DCDCDC;">
 
 											{include file="AplicationContent.tpl"}
 

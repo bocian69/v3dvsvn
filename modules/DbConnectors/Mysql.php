@@ -9,7 +9,7 @@ Class Mysql extends Db {
 	}
 	
 	function showColumns($table) {
-        $sql = "SHOW COLUMNS FROM " . addslashes($table);
+        $sql = sprintf($this->db->metaColumnsSQL, $table);//"SHOW COLUMNS FROM " . addslashes($table);
 		$res = $this->db->Execute($sql);
         foreach ($res as $r) 
         {

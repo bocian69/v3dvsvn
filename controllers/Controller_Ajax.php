@@ -70,7 +70,7 @@ class Controller_Ajax Extends Controller_Base {
 		$columns1 = $this->registry['db']->showColumns($_POST['table1']);
 		$columns2 = $this->registry['db']->showColumns($_POST['table2']);
         
-        $html_returned = "<center>pick join on </center><br />";
+        $html_returned = "<center>Wybierz kolumny do łączenia tabel</center><br />";
         
         $html_returned .= '<p><div style="width:40%;float:left"><center>' . $_POST['table1'] . '</center></div>';
         $html_returned .= '<div style="width:40%;float:right"><center>' . $_POST['table2'] . '</center></div></p>';
@@ -98,8 +98,8 @@ class Controller_Ajax Extends Controller_Base {
         }
         $html_returned .= '</select>';
         
-        $html_returned .= '<p><a href="#" class="JSmarkConstraintChoises" style="float:left">choose this constraint</a>';
-        $html_returned .= '<a href="#" class="JScancelConstraintChoises" style="color:red;float:right">cancel</a></p>';
+        $html_returned .= '<p><a href="#" class="JSmarkConstraintChoises" style="float:left">Dodaj powiązanie</a>';
+        $html_returned .= '<a href="#" class="JScancelConstraintChoises" style="color:red;float:right">Anuluj</a></p>';
         
         print_r($html_returned);
     }

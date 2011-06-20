@@ -41,10 +41,13 @@ Class Controller_Content Extends Controller_Base {
 	function setToolbar() {
 //		$this->registry->pokapoka($this->registry['db']);
 		$databases = $this->registry['db']->showDatabases();
+//		$this->registry->pokapoka($this->registry['db']);
 		$toolbar[] = array('class' => 'toolbar_name','text' => 'Baza: <strong>'.$this->registry['db']->db->database.'</strong>');
 		$toolbar[] = array('class' => 'separator');
 		$toolbar[] = array('class' => 'toolbar_name','text' => 'Połącz z inną bazą:');
 		foreach ($databases as $database) {
+			if (in_array($database, array('information_schema', 'mysql', 'postgres')))
+				continue;
 			$toolbar[] = array('link'  => array('id' 	=> '',
 												  'class' => '',
 												  'href'	=> main_path .'/switchDatabase/dbname/'.$database),
