@@ -9,6 +9,7 @@ See online demo at http://clockwise.com.pl/v3dv/
 ======
 
 The Team:
+
         - Marek Gańko aka Bocian - Web aplication developer & Project manager
         - Pawel Nejczew aka Wolv - Web aplication developer
         - Arek Bomba aka kapitan Bomba - Administrator & Database developer, documentation
